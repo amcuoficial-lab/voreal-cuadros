@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM VOREAL | Gestión de Pedidos</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-crm: #f5f6fa;
+            --bg-card: #ffffff;
+            --text-main: #2f3640;
+            --text-muted: #7f8fa6;
+            --border-color: #dcdde1;
+            --accent-gold: #c5a880;
+            --accent-gold-dark: #a48962;
+            --accent-blue: #0097e6;
+            
+            /* Status Colors */
+            --color-pendiente: #fbc531;
+            --color-produccion: #3498db;
+            --color-enviado: #9b59b6;
+            --color-completado: #2ecc71;
+            
+            --font-sans: 'Inter', sans-serif;
+            --font-serif: 'Cormorant Garamond', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-crm);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Styling */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-section h1 {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        .badge-crm {
+            background-color: var(--text-main);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-dark {
+            background-color: var(--text-main);
+            color: #ffffff;
+        }
+
+        .btn-dark:hover {
+            background-color: #1e2229;
+            transform: translateY(-1px);
+        }
+
+        .btn-gold {
+            background-color: var(--accent-gold);
+            color: white;
+        }
+
+        .btn-gold:hover {
+            background-color: var(--accent-gold-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: var(--text-muted);
+        }
+
+        .metric-card.m-sales::before { background-color: var(--accent-gold); }
+        .metric-card.m-pending::before { background-color: var(--color-pendiente); }
+        .metric-card.m-prod::before { background-color: var(--color-produccion); }
+        .metric-card.m-done::before { background-color: var(--color-completado); }
+
+        .metric-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            font-family: var(--font-serif);
+        }
+
+        /* Control / Filter Bar */
+        .filter-bar {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .search-box {
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .status-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            background-color: var(--bg-crm);
+            border: 1px solid transparent;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-tab:hover {
+            background-color: #e2e4eb;
+        }
+
+        .filter-tab.active {
+            background-color: var(--text-main);
+            color: white;
+        }
+
+        /* CRM Table */
+        .table-container {
+            background-color: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            overflow-x: auto;
+            margin-bottom: 40px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #fcfcfd;
+            border-bottom: 2px solid var(--border-color);
+            padding: 16px 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #fafbfc;
+        }
+
+        .order-id {
+            font-weight: 700;
+            color: var(--text-main);
+            background-color: #f1f2f6;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .client-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .client-name {
+            font-weight: 600;
+        }
+
+        .client-phone {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: underline;
+        }
+
+        .order-items {
+            max-width: 320px;
+            font-size: 13px;
+        }
+
+        .order-item-desc {
+            margin-bottom: 4px;
+        }
+
+        .order-item-desc:last-child {
+            margin-bottom: 0;
+        }
+
+        .total-price {
+            font-weight: 700;
+            font-family: var(--font-serif);
+            font-size: 16px;
+        }
+
+        /* Status Badge / Select Dropdown */
+        .status-wrapper select {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+
+        .status-wrapper select.status-pendiente { background-color: var(--color-pendiente); color: #1c1c1c; }
+        .status-wrapper select.status-produccion { background-color: var(--color-produccion); }
+        .status-wrapper select.status-enviado { background-color: var(--color-enviado); }
+        .status-wrapper select.status-completado { background-color: var(--color-completado); }
+
+        .btn-action-icon {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-action-icon:hover {
+            color: var(--text-main);
+            background-color: #f1f2f6;
+        }
+
+        .btn-action-icon.btn-delete:hover {
+            color: red;
+            background-color: rgba(255,0,0,0.05);
+        }
+
+        .empty-orders {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        /* Modal Details */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            position: relative;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.open .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            font-family: var(--font-serif);
+            font-size: 24px;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+        }
+
+        .modal-body-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .modal-body-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-block h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-block p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .detail-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            background-color: var(--bg-crm);
+        }
+
+        .detail-item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .detail-item-thumb {
+            width: 45px;
+            height: 60px;
+            background-color: #ddd;
+            border-radius: 4px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-item-thumb.detail-triptych {
+            display: flex;
+            gap: 1px;
+        }
+
+        .detail-item-thumb.detail-triptych .detail-sub {
+            flex-grow: 1;
+            height: 100%;
+            background-size: 300% 100%;
+        }
+
+        .detail-item-info {
+            flex-grow: 1;
+        }
+
+        .detail-item-title {
+            font-weight: 700;
+        }
+
+        .detail-item-file {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .image-preview-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .img-full-preview {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: #eee;
+        }
+
+        .btn-download-img {
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 4px;
+            background-color: var(--text-main);
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-download-img:hover {
+            background-color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo-section">
+                <h1>VOREAL</h1>
+                <span class="badge-crm">CRM CUADROS</span>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-dark">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    Ver Tienda
+                </a>
+                <button class="btn btn-gold" id="btn-seed">
+                    Cargar Demos
+                </button>
+            </div>
+        </header>
+
+        <!-- Metrics Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card m-sales">
+                <span class="metric-title">Ventas Totales</span>
+                <span class="metric-value" id="val-sales">$0</span>
+            </div>
+            <div class="metric-card m-pending">
+                <span class="metric-title">Nuevos Pedidos</span>
+                <span class="metric-value" id="val-pending">0</span>
+            </div>
+            <div class="metric-card m-prod">
+                <span class="metric-title">En Producción</span>
+                <span class="metric-value" id="val-production">0</span>
+            </div>
+            <div class="metric-card m-done">
+                <span class="metric-title">Entregados / Listos</span>
+                <span class="metric-value" id="val-completed">0</span>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="search-box">
+                <input type="text" class="search-input" id="search-input" placeholder="Buscar cliente por nombre...">
+            </div>
+            <div class="status-filters">
+                <button class="filter-tab active" data-status="Todos">Todos</button>
+                <button class="filter-tab" data-status="Pendiente">Pendientes</button>
+                <button class="filter-tab" data-status="En Producción">En Producción</button>
+                <button class="filter-tab" data-status="Enviado">Enviados</button>
+                <button class="filter-tab" data-status="Completado">Completados</button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="120">Orden / Fecha</th>
+                        <th>Cliente</th>
+                        <th>Cuadros Pedidos</th>
+                        <th>Importe Total</th>
+                        <th width="160">Estado</th>
+                        <th width="100">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-tbody">
+                    <!-- Dynamic orders loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div class="modal-overlay" id="detail-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2 id="modal-order-id">Detalle del Pedido</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body-grid">
+                <!-- Left column specs -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="detail-block">
+                        <h4>Cliente</h4>
+                        <p id="modal-client-name">-</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4>Contacto Celular</h4>
+                        <p id="modal-client-phone">-</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4>Forma de Entrega</h4>
+                        <p id="modal-delivery-method">-</p>
+                    </div>
+                    <div class="detail-block" id="modal-address-block">
+                        <h4>Dirección de Envío</h4>
+                        <p id="modal-client-address">-</p>
+                    </div>
+                    <div class="detail-block">
+                        <h4>Notas del Cliente</h4>
+                        <p id="modal-client-notes" style="font-style: italic; color: #555;">Ninguna</p>
+                    </div>
+                </div>
+
+                <!-- Right column previews -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="detail-block">
+                        <h4>Cuadros Personalizados</h4>
+                        <div class="detail-items-list" id="modal-items-list">
+                            <!-- Items -->
+                        </div>
+                    </div>
+                    <div class="detail-block image-preview-block" id="modal-image-preview-block">
+                        <h4>Previsualización de Imagen</h4>
+                        <img src="" class="img-full-preview" id="modal-img-preview" alt="Foto del cuadro">
+                        <a href="#" download="voreal-cuadro.jpg" class="btn-download-img" id="modal-btn-download">Descargar Imagen</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CRM logic self-contained
+        const state = {
+            orders: [],
+            currentFilter: 'Todos',
+            currentSearch: ''
+        };
+
+        // MOCK DATA TO SEED
+        const MOCK_ORDERS = [
+            {
+                id: 'VR-7741',
+                client: {
+                    name: 'María Celeste',
+                    phone: '1146739324',
+                    delivery: 'envio',
+                    address: 'Av. Santa Fe 3420, Palermo, CABA',
+                    notes: 'Es un regalo de aniversario. ¿Por favor me lo envían bien embalado?'
+                },
+                items: [
+                    {
+                        size: 'chico',
+                        sizeName: 'CHICOS (25x30 cm)',
+                        quantity: 3,
+                        unitPrice: 10000,
+                        imageName: 'foto_familiar_abuelo.jpg',
+                        imageSrc: 'https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=800'
+                    }
+                ],
+                originalTotal: 30000,
+                finalTotal: 25000,
+                promoApplied: true,
+                date: '25/05/2026 14:32',
+                status: 'Pendiente'
+            },
+            {
+                id: 'VR-3921',
+                client: {
+                    name: 'Javier Pérez',
+                    phone: '1158902143',
+                    delivery: 'retiro',
+                    address: '',
+                    notes: 'Retiro por la tarde. Avísenme al WhatsApp apenas esté listo.'
+                },
+                items: [
+                    {
+                        size: 'clasico',
+                        sizeName: 'CLÁSICO (30x50 cm)',
+                        quantity: 1,
+                        unitPrice: 15000,
+                        imageName: 'mi_perrito_tito.png',
+                        imageSrc: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=800'
+                    },
+                    {
+                        size: 'grande',
+                        sizeName: 'GRANDE (50x60 cm)',
+                        quantity: 1,
+                        unitPrice: 25000,
+                        imageName: 'pato_donald_poker.jpg',
+                        imageSrc: 'https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=800'
+                    }
+                ],
+                originalTotal: 40000,
+                finalTotal: 40000,
+                promoApplied: false,
+                date: '25/05/2026 10:15',
+                status: 'En Producción'
+            },
+            {
+                id: 'VR-9125',
+                client: {
+                    name: 'Carlos Tevez',
+                    phone: '1199887766',
+                    delivery: 'envio',
+                    address: 'Fuerte Apache Torre A, Ciudadela',
+                    notes: 'Es el tríptico de Messi besando la copa.'
+                },
+                items: [
+                    {
+                        size: 'triptico',
+                        sizeName: 'TRÍPTICO (3 paneles)',
+                        quantity: 1,
+                        unitPrice: 35000,
+                        imageName: 'messi_campeon_mundial.jpg',
+                        imageSrc: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800'
+                    }
+                ],
+                originalTotal: 35000,
+                finalTotal: 35000,
+                promoApplied: false,
+                date: '24/05/2026 18:40',
+                status: 'Completado'
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrders();
+            initListeners();
+            updateDashboard();
+        });
+
+        function loadOrders() {
+            try {
+                const stored = localStorage.getItem('voreal_orders');
+                if (stored) {
+                    state.orders = JSON.parse(stored);
+                } else {
+                    // Seed mock data initially
+                    state.orders = [...MOCK_ORDERS];
+                    saveOrdersToStorage();
+                }
+            } catch(e) {
+                console.error("Error loading orders", e);
+                state.orders = [...MOCK_ORDERS];
+            }
+        }
+
+        function saveOrdersToStorage() {
+            try {
+                localStorage.setItem('voreal_orders', JSON.stringify(state.orders));
+            } catch(e) {
+                console.error("Error saving orders", e);
+            }
+        }
+
+        function initListeners() {
+            // Seed Button
+            document.getElementById('btn-seed').addEventListener('click', () => {
+                if (confirm('¿Cargar órdenes demo en el panel? Se añadirán a las existentes.')) {
+                    state.orders = [...MOCK_ORDERS, ...state.orders];
+                    saveOrdersToStorage();
+                    updateDashboard();
+                }
+            });
+
+            // Filter tabs
+            const tabs = document.querySelectorAll('.filter-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    state.currentFilter = tab.dataset.status;
+                    renderOrders();
+                });
+            });
+
+            // Search input
+            document.getElementById('search-input').addEventListener('input', (e) => {
+                state.currentSearch = e.target.value.toLowerCase();
+                renderOrders();
+            });
+
+            // Close Modal
+            document.getElementById('modal-close').addEventListener('click', closeModal);
+            document.getElementById('detail-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'detail-modal') closeModal();
+            });
+        }
+
+        function updateDashboard() {
+            renderOrders();
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            let totalSales = 0;
+            let pendingCount = 0;
+            let productionCount = 0;
+            let completedCount = 0;
+
+            state.orders.forEach(order => {
+                if (order.status === 'Completado' || order.status === 'Enviado') {
+                    totalSales += order.finalTotal;
+                    completedCount++;
+                } else if (order.status === 'Pendiente') {
+                    pendingCount++;
+                } else if (order.status === 'En Producción') {
+                    productionCount++;
+                }
+            });
+
+            document.getElementById('val-sales').textContent = formatPrice(totalSales);
+            document.getElementById('val-pending').textContent = pendingCount;
+            document.getElementById('val-production').textContent = productionCount;
+            document.getElementById('val-completed').textContent = completedCount;
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('orders-tbody');
+            tbody.innerHTML = '';
+
+            const filteredOrders = state.orders.filter(order => {
+                const matchesFilter = state.currentFilter === 'Todos' || order.status === state.currentFilter;
+                const matchesSearch = order.client.name.toLowerCase().includes(state.currentSearch);
+                return matchesFilter && matchesSearch;
+            });
+
+            if (filteredOrders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-orders">
+                            No se encontraron pedidos con los filtros actuales.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredOrders.forEach(order => {
+                const tr = document.createElement('tr');
+                
+                // Formulate items list string
+                const itemsTextHTML = order.items.map(item => 
+                    `<div class="order-item-desc"><strong>${item.quantity}x</strong> ${item.sizeName} <span style="color:var(--text-muted);font-size:11px;">(${truncateString(item.imageName, 20)})</span></div>`
+                ).join('');
+
+                // Status styling class
+                const statusClass = 'status-' + order.status.toLowerCase().replace(' ', '-');
+
+                tr.innerHTML = `
+                    <td>
+                        <span class="order-id">${order.id}</span>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:6px;">${order.date}</div>
+                    </td>
+                    <td>
+                        <div class="client-info">
+                            <span class="client-name">${order.client.name}</span>
+                            <a href="https://wa.me/${formatPhoneForWa(order.client.phone)}" target="_blank" class="client-phone">📱 ${order.client.phone}</a>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="order-items">${itemsTextHTML}</div>
+                    </td>
+                    <td>
+                        <span class="total-price">${formatPrice(order.finalTotal)}</span>
+                        ${order.promoApplied ? '<div style="font-size:9px;color:var(--accent-gold-dark);font-weight:600;">Promo Aplicada</div>' : ''}
+                    </td>
+                    <td>
+                        <div class="status-wrapper">
+                            <select class="${statusClass}" onchange="changeOrderStatus('${order.id}', this.value)">
+                                <option value="Pendiente" ${order.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+                                <option value="En Producción" ${order.status === 'En Producción' ? 'selected' : ''}>En Producción</option>
+                                <option value="Enviado" ${order.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+                                <option value="Completado" ${order.status === 'Completado' ? 'selected' : ''}>Completado</option>
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn-action-icon" onclick="openDetails('${order.id}')" title="Ver Detalles">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>
+                        </button>
+                        <button class="btn-action-icon btn-delete" onclick="deleteOrder('${order.id}')" title="Eliminar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Action Handlers
+        window.changeOrderStatus = function(orderId, newStatus) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                saveOrdersToStorage();
+                updateDashboard(); // Recalcula métricas y vuelve a renderizar la tabla para actualizar filtros y clases CSS de color
+            }
+        };
+
+        window.deleteOrder = function(orderId) {
+            if (confirm(`¿Estás seguro de eliminar el pedido ${orderId}?`)) {
+                state.orders = state.orders.filter(o => o.id !== orderId);
+                saveOrdersToStorage();
+                updateDashboard();
+            }
+        };
+
+        window.openDetails = function(orderId) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            document.getElementById('modal-order-id').textContent = `Pedido ${order.id}`;
+            document.getElementById('modal-client-name').textContent = order.client.name;
+            
+            const waPhone = formatPhoneForWa(order.client.phone);
+            document.getElementById('modal-client-phone').innerHTML = `
+                <a href="https://wa.me/${waPhone}" target="_blank" style="color:var(--accent-blue); font-weight:600;">
+                    ${order.client.phone} (Abrir Chat de WhatsApp)
+                </a>
+            `;
+            
+            document.getElementById('modal-delivery-method').textContent = order.client.delivery === 'envio' ? 'Envío a Domicilio/Correo' : 'Retiro por Punto de Entrega';
+            
+            const addressBlock = document.getElementById('modal-address-block');
+            if (order.client.delivery === 'envio') {
+                addressBlock.style.display = 'block';
+                document.getElementById('modal-client-address').textContent = order.client.address;
+            } else {
+                addressBlock.style.display = 'none';
+            }
+
+            document.getElementById('modal-client-notes').textContent = order.client.notes || 'Ninguna';
+
+            // Items lists
+            const itemsList = document.getElementById('modal-items-list');
+            itemsList.innerHTML = '';
+            
+            order.items.forEach(item => {
+                const itemRow = document.createElement('div');
+                itemRow.className = 'detail-item-row';
+
+                let thumbHTML = '';
+                if (item.size === 'triptico') {
+                    thumbHTML = `
+                        <div class="detail-item-thumb detail-triptych">
+                            <div class="detail-sub" style="background-image: url('${item.imageSrc}'); background-position: 0% center;"></div>
+                            <div class="detail-sub" style="background-image: url('${item.imageSrc}'); background-position: 50% center;"></div>
+                            <div class="detail-sub" style="background-image: url('${item.imageSrc}'); background-position: 100% center;"></div>
+                        </div>
+                    `;
+                } else {
+                    thumbHTML = `<div class="detail-item-thumb" style="background-image: url('${item.imageSrc}');"></div>`;
+                }
+
+                itemRow.innerHTML = `
+                    ${thumbHTML}
+                    <div class="detail-item-info">
+                        <div class="detail-item-title">${item.quantity}x ${item.sizeName}</div>
+                        <div class="detail-item-file">Foto: ${item.imageName}</div>
+                    </div>
+                    <div style="font-weight:600;">${formatPrice(item.unitPrice * item.quantity)}</div>
+                `;
+                itemsList.appendChild(itemRow);
+            });
+
+            // Set main image preview to the first item's photo
+            const previewBlock = document.getElementById('modal-image-preview-block');
+            const imgPreview = document.getElementById('modal-img-preview');
+            const btnDownload = document.getElementById('modal-btn-download');
+
+            if (order.items.length > 0 && order.items[0].imageSrc) {
+                previewBlock.style.display = 'flex';
+                imgPreview.src = order.items[0].imageSrc;
+                btnDownload.href = order.items[0].imageSrc;
+                btnDownload.download = `voreal-${order.id}-${order.items[0].imageName}`;
+            } else {
+                previewBlock.style.display = 'none';
+            }
+
+            // Show Modal
+            document.getElementById('detail-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        };
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Helpers
+        function formatPrice(val) {
+            return new Intl.NumberFormat('es-AR', {
+                style: 'currency',
+                currency: 'ARS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(val);
+        }
+
+        function truncateString(str, num) {
+            if (!str) return '';
+            if (str.length <= num) return str;
+            return str.slice(0, num) + '...';
+        }
+
+        function formatPhoneForWa(phone) {
+            if (!phone) return '';
+            // Eliminar todo lo que no sea número
+            let cleaned = phone.replace(/\D/g, '');
+            
+            // Quitar 0 inicial si existe (ej. 011 -> 11)
+            if (cleaned.startsWith('0')) {
+                cleaned = cleaned.substring(1);
+            }
+            
+            // Si ya tiene código de país 54
+            if (cleaned.startsWith('54')) {
+                // Si tiene 54 pero le falta el 9 para celular (ej. 5411...)
+                if (cleaned.length === 12 && !cleaned.startsWith('549')) {
+                    cleaned = '549' + cleaned.substring(2);
+                }
+                return cleaned;
+            }
+            
+            // Caso celular argentino con 15 al principio (ej. 1546739324 -> 10 dígitos)
+            // Asumimos código de área de Buenos Aires (11) si no tiene otro prefijo detectable.
+            if (cleaned.startsWith('15') && cleaned.length === 10) {
+                cleaned = '11' + cleaned.substring(2);
+            }
+            
+            // Caso celular con prefijo local + 15 (ej. 111546739324 o 34115678910 -> 12 o 11 dígitos)
+            // Si tiene 12 dígitos y el 15 está después del prefijo 11 (ej. 11 15 4673 9324)
+            if (cleaned.length === 12 && cleaned.substring(2, 4) === '15') {
+                cleaned = cleaned.substring(0, 2) + cleaned.substring(4);
+            } else if (cleaned.length === 11 && cleaned.substring(3, 5) === '15') {
+                // ej: 3411567891 -> limpio es de 10 dígitos si quitamos el 15.
+                // Si mide 11 dígitos y tiene '15' en posiciones 3 y 4 (índices 3, 4)
+                cleaned = cleaned.substring(0, 3) + cleaned.substring(5);
+            }
+            
+            // Si después de limpiar tiene 10 dígitos (número estándar con área y sin 15)
+            if (cleaned.length === 10) {
+                cleaned = '549' + cleaned;
+            } else if (cleaned.length === 11 && !cleaned.startsWith('549')) {
+                // Si tiene 11 dígitos y no empieza con 549 (ej. 341678910)
+                cleaned = '549' + cleaned;
+            }
+            
+            return cleaned;
+        }
+    </script>
+</body>
+</html>
