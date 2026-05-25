@@ -442,8 +442,6 @@ a {
 .triptych-frame-container {
     display: flex;
     gap: 10px;
-    width: 324px; /* 3 * 100px + gaps */
-    height: 240px; /* 50cm tall equivalent ratio */
     justify-content: center;
     align-items: center;
     transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
@@ -451,8 +449,6 @@ a {
 }
 
 .triptych-panel {
-    width: 100px;
-    height: 240px;
     border: none;
     box-shadow: 
         1px 1px 0 #2c2c2c, 
@@ -461,6 +457,35 @@ a {
         6px 10px 18px rgba(0, 0, 0, 0.3); /* Consistent 3D extrusion on triptych panels */
     margin: 0;
     transform: none; /* overrides standard 3D rotation */
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Triptych sizes in previsualizer */
+.triptych-frame-container.triptico_chico {
+    width: 250px;
+    height: 144px;
+}
+.triptych-frame-container.triptico_chico .triptych-panel {
+    width: 70px;
+    height: 144px;
+}
+
+.triptych-frame-container.triptico_clasico {
+    width: 324px;
+    height: 240px;
+}
+.triptych-frame-container.triptico_clasico .triptych-panel {
+    width: 100px;
+    height: 240px;
+}
+
+.triptych-frame-container.triptico_grande {
+    width: 440px;
+    height: 288px;
+}
+.triptych-frame-container.triptico_grande .triptych-panel {
+    width: 130px;
+    height: 288px;
 }
 
 .panel-content {

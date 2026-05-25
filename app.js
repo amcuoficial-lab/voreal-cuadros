@@ -32,12 +32,26 @@ const PRICING = {
         promoPrice: 40000,
         promoText: '2x $40.000'
     },
-    triptico: {
-        name: 'TRÍPTICO (3 paneles)',
+    triptico_chico: {
+        name: 'TRÍPTICO CHICO (3x 25x30 cm)',
+        unitPrice: 25000,
+        promoQty: 2,
+        promoPrice: 45000,
+        promoText: '2x $45.000'
+    },
+    triptico_clasico: {
+        name: 'TRÍPTICO CLÁSICO (3x 30x50 cm - total 1x50 cm)',
         unitPrice: 35000,
         promoQty: 2,
         promoPrice: 60000,
         promoText: '2x $60.000'
+    },
+    triptico_grande: {
+        name: 'TRÍPTICO GRANDE (3x 50x60 cm)',
+        unitPrice: 55000,
+        promoQty: 2,
+        promoPrice: 100000,
+        promoText: '2x $100.000'
     }
 };
 
@@ -238,7 +252,9 @@ function initEventListeners() {
 
     // Direct WhatsApp Button for Triptychs (Triptychs are processed directly via WhatsApp)
     elements.whatsappDirectBtn.addEventListener('click', () => {
-        const message = `¡Hola *Voreal Cuadros*! Me interesa encargar un cuadro en formato *TRÍPTICO* (3 paneles, total 1x50 cm).\n\n¿Podrían mostrarme los diseños/modelos disponibles y cómo enviar las fotos? 📲`;
+        const size = state.selectedSize;
+        const config = PRICING[size];
+        const message = `¡Hola *Voreal Cuadros*! Me interesa encargar un cuadro en formato *${config.name}*.\n\n¿Podrían mostrarme los diseños/modelos disponibles para este tamaño y cómo enviar las fotos? 📲`;
         const encodedText = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
         window.open(whatsappUrl, '_blank');
@@ -336,10 +352,19 @@ function updateCustomizerDimensions() {
     // Reset sizes classes
     elements.previewFrame.className = 'virtual-frame single-frame';
     
-    if (size === 'triptico') {
+    if (size.startsWith('triptico_')) {
         elements.previewFrame.classList.add('hidden');
         elements.previewTriptych.classList.remove('hidden');
-        elements.scaleText.textContent = '3 paneles (total 1x50 cm)';
+        
+        // Apply the correct size class for the triptych container
+        elements.previewTriptych.className = 'triptych-frame-container ' + size;
+        
+        let label = '3 paneles';
+        if (size === 'triptico_chico') label = '3 paneles (3x 25x30 cm)';
+        if (size === 'triptico_clasico') label = '3 paneles (3x 30x50 cm - total 1x50 cm)';
+        if (size === 'triptico_grande') label = '3 paneles (3x 50x60 cm)';
+        elements.scaleText.textContent = label;
+        
         if (elements.triptychNotice) elements.triptychNotice.classList.remove('hidden');
         if (elements.stepUploadGroup) elements.stepUploadGroup.classList.add('hidden');
         if (elements.addToCartBtn) elements.addToCartBtn.classList.add('hidden');
@@ -368,7 +393,7 @@ function addToCart() {
     
     // For single formats, check if photo is uploaded.
     // For triptychs, we allow checkout without photo upload (it coordinates via WhatsApp).
-    if (!state.uploadedImage && size !== 'triptico') {
+    if (!state.uploadedImage && !size.startsWith('triptico_')) {
         alert('🎨 Por favor, sube tu foto o selecciona una imagen de muestra antes de agregar al carrito.');
         
         // Scroll smoothly to drop zone
