@@ -2,7 +2,7 @@
 
 // 1. App State
 const state = {
-    selectedSize: 'chico', // chico, clasico, grande, triptico
+    selectedSize: '', // chico, clasico, grande, triptico
     currentRoom: 'living', // living, bedroom, studio, clean
     uploadedImage: null,   // base64 image data url
     uploadedFilename: '', // original image filename
@@ -66,6 +66,8 @@ const elements = {
     scaleText: document.getElementById('scale-text'),
     triptychNotice: document.getElementById('triptych-notice'),
     triptychPreviewInfo: document.getElementById('triptych-preview-info'),
+    visualizerPlaceholder: document.getElementById('visualizer-placeholder'),
+    priceActionBox: document.getElementById('price-action-box'),
     
     // Controls Elements
     imageUpload: document.getElementById('image-upload'),
@@ -114,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initEventListeners();
     updateUI();
     initGalleryCarousels();
+    initWhatsAppChatWidget();
 });
 
 // 4. Event Listeners Setup
@@ -339,6 +342,22 @@ function applyImageToFrames(src) {
 // 6. Update Customizer Dimensions & Scaling Visuals
 function updateCustomizerDimensions() {
     const size = state.selectedSize;
+    
+    if (!size) {
+        // No size selected yet
+        if (elements.visualizerPlaceholder) elements.visualizerPlaceholder.classList.remove('hidden');
+        if (elements.previewFrame) elements.previewFrame.classList.add('hidden');
+        if (elements.previewTriptych) elements.previewTriptych.classList.add('hidden');
+        if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.add('hidden');
+        if (elements.stepUploadGroup) elements.stepUploadGroup.classList.add('hidden');
+        if (elements.priceActionBox) elements.priceActionBox.classList.add('hidden');
+        return;
+    }
+    
+    // Size selected
+    if (elements.visualizerPlaceholder) elements.visualizerPlaceholder.classList.add('hidden');
+    if (elements.priceActionBox) elements.priceActionBox.classList.remove('hidden');
+    
     const config = PRICING[size];
     
     // Update labels
@@ -788,4 +807,191 @@ function initGalleryCarousels() {
             }, 5000);
         });
     });
+}
+
+// 13. WhatsApp AI Chat Bot Widget Logic
+function initWhatsAppChatWidget() {
+    const bubbleBtn = document.getElementById('wa-bubble-btn');
+    const chatBox = document.getElementById('wa-chat-box');
+    const closeBtn = document.getElementById('wa-close-btn');
+    const chatInput = document.getElementById('wa-chat-input');
+    const sendBtn = document.getElementById('wa-send-btn');
+    const messagesContainer = document.getElementById('wa-chat-messages');
+    const bubbleBadge = bubbleBtn ? bubbleBtn.querySelector('.wa-badge') : null;
+
+    if (!bubbleBtn || !chatBox) return;
+
+    // Toggle Chat Window
+    bubbleBtn.addEventListener('click', () => {
+        const isOpen = chatBox.classList.contains('open');
+        if (!isOpen) {
+            chatBox.classList.add('open');
+            if (bubbleBadge) bubbleBadge.classList.add('hidden'); // Oculta la notificación al abrir
+            setTimeout(() => {
+                if (chatInput) chatInput.focus();
+            }, 300);
+        } else {
+            chatBox.classList.remove('open');
+        }
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            chatBox.classList.remove('open');
+        });
+    }
+
+    // Input submit with Enter key
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendUserMessage();
+            }
+        });
+    }
+
+    if (sendBtn) {
+        sendBtn.addEventListener('click', () => {
+            sendUserMessage();
+        });
+    }
+
+    // Global function to call from quick options
+    window.handleWaOption = function(option) {
+        let userText = '';
+        if (option === 'comprar') userText = '🎨 ¿Cómo comprar un cuadro?';
+        else if (option === 'envios') userText = '🚚 Envíos y tiempos de fabricación';
+        else if (option === 'precios') userText = '💰 Ver lista de precios';
+        else if (option === 'agente') userText = '👤 Hablar con un Asesor Humano';
+
+        appendMessage(userText, 'sent');
+        removeQuickOptions();
+        
+        showTypingIndicator();
+
+        setTimeout(() => {
+            removeTypingIndicator();
+            let botText = '';
+            
+            if (option === 'comprar') {
+                botText = `¡Es súper fácil comprar tu cuadro Voreal! 👇\n\n1️⃣ Elegí la medida en la sección **1. Elige el tamaño**.\n2️⃣ Si elegiste un tamaño simple (Chico, Clásico o Grande), se abrirá la opción de **2. Sube tu imagen** para que cargues tu foto favorita. ¡Verás cómo queda colgada en tiempo real!\n3️⃣ Hacé clic en **Agregar al Carrito**, ingresá tus datos de envío y listo. Nos comunicamos por WhatsApp para finalizar.\n\n*Nota:* Para formatos **Trípticos**, hacé clic directo en *"Pedir Tríptico por WhatsApp"* y te enviamos un montaje digital del diseño con tu foto sin costo antes de que pagues. ✨`;
+                appendMessage(botText, 'received');
+                showQuickOptions();
+            } else if (option === 'envios') {
+                botText = `Nuestros métodos de envío y plazos son los siguientes: 👇\n\n• 🛠️ **Fabricación**: Demoramos exactamente **7 días** de corrido en producir tu cuadro desde que confirmamos las fotos.\n• 🛵 **Moto (CABA/GBA)**: Envío express directo a tu puerta.\n• 📦 **Andreani (A Domicilio)**: Enviamos a cualquier rincón de Argentina.\n• 🏪 **Andreani (A Sucursal)**: Retirás en la sucursal Andreani que prefieras.\n• 📍 **Punto de Retiro gratis**: Podés retirar sin cargo por Microcentro (CABA) coordinando día y horario.`;
+                appendMessage(botText, 'received');
+                showQuickOptions();
+            } else if (option === 'precios') {
+                botText = `💰 **Lista de Precios Voreal (Actualizada):**\n\n• **Chicos (25x30 cm)**: $10.000 c/u\n   🔥 *¡PROMO:* **3x $25.000**\n• **Clásicos (30x50 cm)**: $15.000 c/u\n   🔥 *¡PROMO:* **3x $30.000**\n• **Grandes (50x60 cm)**: $25.000 c/u\n   🔥 *¡PROMO:* **2x $40.000**\n• **Tríptico Clásico** (3 paneles): $35.000 c/u\n   🔥 *¡PROMO:* **2x $60.000**\n• **Tríptico Grande** (3 paneles): $55.000 c/u\n   🔥 *¡PROMO:* **2x $100.000**\n\n*Los descuentos se aplican automáticamente en tu carrito web.*`;
+                appendMessage(botText, 'received');
+                showQuickOptions();
+            } else if (option === 'agente') {
+                botText = `Te estoy conectando con nuestro equipo humano en WhatsApp Business para brindarte asesoramiento personalizado... 📲\n\nSi no se abre automáticamente, hacé clic en el botón de abajo:\n\n👉 **[Hablar con un Agente en WhatsApp](https://wa.me/5491146739324?text=Hola,%20necesito%20asistencia%20de%20un%20agente%20humano)**`;
+                appendMessage(botText, 'received');
+                
+                setTimeout(() => {
+                    window.open('https://wa.me/5491146739324?text=Hola,%20necesito%20asistencia%20de%20un%20agente%20humano', '_blank');
+                }, 1000);
+            }
+        }, 1200);
+    };
+
+    function sendUserMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'sent');
+        chatInput.value = '';
+        removeQuickOptions();
+
+        showTypingIndicator();
+
+        setTimeout(() => {
+            removeTypingIndicator();
+            const textLower = text.toLowerCase();
+            let botText = '';
+
+            if (textLower.includes('precio') || textLower.includes('cuanto sale') || textLower.includes('costo') || textLower.includes('precios') || textLower.includes('cuánto sale') || textLower.includes('cuanto cuestan') || textLower.includes('cuanto cuesta')) {
+                botText = `💰 **Precios y Promociones Voreal:**\n\n• **Chicos (25x30 cm)**: $10.000\n   🔥 *PROMO:* **3x $25.000**\n• **Clásicos (30x50 cm)**: $15.000\n   🔥 *PROMO:* **3x $30.000**\n• **Grandes (50x60 cm)**: $25.000\n   🔥 *PROMO:* **2x $40.000**\n• **Tríptico Clásico**: $35.000\n   🔥 *PROMO:* **2x $60.000**\n• **Tríptico Grande**: $55.000\n   🔥 *PROMO:* **2x $100.000**`;
+            } else if (textLower.includes('material') || textLower.includes('madera') || textLower.includes('calidad') || textLower.includes('como son') || textLower.includes('bastidor') || textLower.includes('bastidores') || textLower.includes('paneles')) {
+                botText = `🎨 **Calidad de Galería Premium:**\nNuestros cuadros son de **alta definición montados en madera listos para colgar**. Son impresiones ultra-nítidas de colores vibrantes acopladas a bastidores de madera livianos. Vienen listos con colgadores o adhesivos premium para que los coloques sin necesidad de clavar la pared.`;
+            } else if (textLower.includes('envio') || textLower.includes('envío') || textLower.includes('andreani') || textLower.includes('moto') || textLower.includes('sucursal') || textLower.includes('correo') || textLower.includes('despacho')) {
+                botText = `🚚 **Métodos de Envío en Argentina:**\n\n• 🛵 **Moto Express**: Entregas rápidas en CABA y Gran Buenos Aires.\n• 📦 **Andreani a Domicilio**: A cualquier código postal del país.\n• 🏪 **Andreani a Sucursal**: Ideal para retirar cuando tengas tiempo.\n• 📍 **Punto de Retiro**: Podés retirar gratis en Microcentro coordinando previamente con nosotros.`;
+            } else if (textLower.includes('tiempo') || textLower.includes('tardan') || textLower.includes('demora') || textLower.includes('plazo') || textLower.includes('fabricacion') || textLower.includes('fabricación') || textLower.includes('cuanto demora') || textLower.includes('cuánto demora')) {
+                botText = `⏱️ **Tiempos de Fabricación y Entrega:**\nLa producción demora exactamente **7 días** desde el momento en que confirmamos las fotos del pedido por WhatsApp. Posteriormente se realiza el despacho o retiro.`;
+            } else if (textLower.includes('humano') || textLower.includes('agente') || textLower.includes('vendedor') || textLower.includes('asesor') || textLower.includes('whatsapp') || textLower.includes('wsap') || textLower.includes('contacto') || textLower.includes('hablar')) {
+                botText = `Te estoy derivando con un asesor humano para asistirte personalmente en lo que necesites. 📲\n\nHacé clic en el siguiente botón:\n\n👉 **[Hablar con un Agente en WhatsApp](https://wa.me/5491146739324?text=Hola,%20necesito%20asistencia%20de%20un%20agente%20humano)**`;
+                setTimeout(() => {
+                    window.open('https://wa.me/5491146739324?text=Hola,%20necesito%20asistencia%20de%20un%20agente%20humano', '_blank');
+                }, 1000);
+            } else if (textLower.includes('chico') && textLower.includes('triptico') || textLower.includes('tríptico chico')) {
+                botText = `⚠️ **Nota sobre Trípticos:**\nActualmente **no contamos con la opción de Tríptico Chico (3x 25x30 cm)**. Los tamaños de Trípticos disponibles son:\n• **Tríptico Clásico**: 3x 30x50 cm\n• **Tríptico Grande**: 3x 50x60 cm\nSi querés un diseño personalizado en otra medida, coordinémoslo con un Asesor Humano.`;
+            } else {
+                botText = `¡Gracias por tu mensaje! 🤖 Como asistente de Inteligencia Artificial de Voreal, te puedo informar sobre precios, materiales, métodos de envío o asistencia en personalización.\n\nSi preferís que te atienda un vendedor humano en WhatsApp Business, escribí la palabra **"agente"** o seleccioná la opción en el menú.`;
+            }
+
+            appendMessage(botText, 'received');
+            showQuickOptions();
+        }, 1200);
+    }
+
+    function appendMessage(text, type) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `wa-message ${type}`;
+        
+        // Simple markdown link conversion for bot replies
+        let formattedText = text;
+        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+        formattedText = formattedText.replace(linkRegex, '<a href="$2" target="_blank" style="color: #075E54; font-weight: bold; text-decoration: underline;">$1</a>');
+        
+        // Bold formatting
+        formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        formattedText = formattedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        
+        msgDiv.innerHTML = `<p>${formattedText}</p>`;
+        messagesContainer.appendChild(msgDiv);
+        
+        // Scroll to bottom
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        const ind = document.createElement('div');
+        ind.className = 'wa-typing-indicator';
+        ind.id = 'wa-typing-indicator';
+        ind.innerHTML = `Voreal está escribiendo
+            <div class="wa-typing-dots">
+                <div class="wa-typing-dot"></div>
+                <div class="wa-typing-dot"></div>
+                <div class="wa-typing-dot"></div>
+            </div>`;
+        messagesContainer.appendChild(ind);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const ind = document.getElementById('wa-typing-indicator');
+        if (ind) ind.remove();
+    }
+
+    function removeQuickOptions() {
+        const opts = document.getElementById('wa-quick-options');
+        if (opts) opts.remove();
+    }
+
+    function showQuickOptions() {
+        removeQuickOptions(); // ensure single instance
+        
+        const optsDiv = document.createElement('div');
+        optsDiv.className = 'wa-quick-options';
+        optsDiv.id = 'wa-quick-options';
+        optsDiv.innerHTML = `
+            <button class="wa-opt-btn" onclick="handleWaOption('comprar')">🎨 ¿Cómo comprar un cuadro?</button>
+            <button class="wa-opt-btn" onclick="handleWaOption('envios')">🚚 Envíos y tiempos de fabricación</button>
+            <button class="wa-opt-btn" onclick="handleWaOption('precios')">💰 Ver lista de precios</button>
+            <button class="wa-opt-btn" onclick="handleWaOption('agente')">👤 Hablar con un Asesor Humano</button>
+        `;
+        messagesContainer.appendChild(optsDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
 }

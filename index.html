@@ -87,8 +87,17 @@
                 <div class="room-canvas" id="room-canvas" data-current-room="clean">
                     <!-- Virtual hanging frame(s) -->
                     <div class="virtual-frame-container" id="frame-container">
+                        <!-- Selection Placeholder -->
+                        <div class="visualizer-placeholder" id="visualizer-placeholder">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <polyline points="9 17 9 12 15 12 15 17"></polyline>
+                            </svg>
+                            <p>Elige un tamaño para comenzar a diseñar tu cuadro</p>
+                        </div>
+
                         <!-- Standard single frame preview -->
-                        <div class="virtual-frame single-frame shadow-3d" id="preview-frame">
+                        <div class="virtual-frame single-frame shadow-3d hidden" id="preview-frame">
                             <div class="frame-content" id="frame-content">
                                 <div class="upload-placeholder" id="placeholder-text">
                                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -141,7 +150,7 @@
                     <h3 class="control-label">1. Elige el tamaño</h3>
                     <div class="sizes-grid">
                         <!-- CHICOS -->
-                        <div class="size-card active" data-size="chico">
+                        <div class="size-card" data-size="chico">
                             <div class="size-card-header">
                                 <span class="size-name">CHICOS</span>
                                 <span class="size-dims">25x30 cm</span>
@@ -644,6 +653,64 @@
             <p>&copy; 2026 VOREAL Cuadros. Todos los derechos reservados.</p>
         </div>
     </footer>
+
+    <!-- WhatsApp IA Chat Widget -->
+    <div class="wa-chat-widget" id="wa-chat-widget">
+        <!-- Floating Bubble Button -->
+        <button class="wa-bubble-btn" id="wa-bubble-btn" aria-label="Abrir Chat de WhatsApp">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.86.002-2.63-1.023-5.101-2.887-6.968C16.582 1.91 14.11 1.887 11.478 1.887c-5.438 0-9.862 4.42-9.866 9.861-.001 1.762.461 3.483 1.337 5.004L1.93 22.064l5.348-1.402c1.603.876 3.4.137 5.176.137zm11.215-4.792c-.3-.149-1.786-.882-2.057-.981-.273-.099-.471-.148-.669.149-.197.297-.767.98-.94 1.179-.173.197-.347.222-.647.073-.3-.15-1.266-.467-2.41-1.488-.891-.795-1.493-1.777-1.667-2.074-.173-.297-.018-.458.13-.606.134-.133.3-.347.45-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.786-.731 2.034-1.438.248-.706.248-1.312.173-1.438-.075-.125-.272-.198-.57-.347z"/>
+            </svg>
+            <span class="wa-badge">1</span>
+        </button>
+
+        <!-- Chat Box Window -->
+        <div class="wa-chat-box" id="wa-chat-box">
+            <!-- Header -->
+            <div class="wa-chat-header">
+                <div class="wa-avatar">
+                    <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="47" fill="#ffffff" stroke="#c5a880" stroke-width="1.5"/>
+                        <rect x="33" y="25" width="34" height="34" stroke="#1c1c1c" stroke-width="1"/>
+                        <path d="M41 33 L50 51" stroke="#c5a880" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M50 51 L59 33" stroke="#DCA2A7" stroke-width="4" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="wa-header-info">
+                    <h4>Voreal | Asistente IA 🤖</h4>
+                    <p>En línea • Respuesta inmediata</p>
+                </div>
+                <button class="wa-close-btn" id="wa-close-btn" aria-label="Cerrar chat">&times;</button>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="wa-chat-messages" id="wa-chat-messages">
+                <div class="wa-message received">
+                    <p>¡Hola! 👋 Bienvenido a <strong>Voreal Cuadros</strong>. Soy tu asistente virtual con Inteligencia Artificial.</p>
+                </div>
+                <div class="wa-message received">
+                    <p>¿En qué te puedo ayudar hoy? Selecciona una opción o escribe tu consulta:</p>
+                </div>
+                <div class="wa-quick-options" id="wa-quick-options">
+                    <button class="wa-opt-btn" onclick="handleWaOption('comprar')">🎨 ¿Cómo comprar un cuadro?</button>
+                    <button class="wa-opt-btn" onclick="handleWaOption('envios')">🚚 Envíos y tiempos de fabricación</button>
+                    <button class="wa-opt-btn" onclick="handleWaOption('precios')">💰 Ver lista de precios</button>
+                    <button class="wa-opt-btn" onclick="handleWaOption('agente')">👤 Hablar con un Asesor Humano</button>
+                </div>
+            </div>
+
+            <!-- Footer / Input -->
+            <div class="wa-chat-footer">
+                <input type="text" id="wa-chat-input" placeholder="Escribe tu mensaje aquí..." aria-label="Mensaje para el bot">
+                <button id="wa-send-btn" aria-label="Enviar mensaje">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="app.js"></script>
