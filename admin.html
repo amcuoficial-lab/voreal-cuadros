@@ -1407,7 +1407,7 @@
             } else if (status === 'Enviado') {
                 message = `Hola *${clientName}*, te informamos que tu pedido *${order.id}* de Voreal ya fue despachado. 📦 En breve te compartimos los detalles de seguimiento.`;
             } else if (status === 'Completado') {
-                if (order.client.delivery === 'envio') {
+                if (order.client.delivery !== 'retiro') {
                     message = `Hola *${clientName}*, tu pedido *${order.id}* de Voreal ya fue entregado con éxito. 🎉 ¡Esperamos que te encante tanto como a nosotros fabricarlo!`;
                 } else {
                     message = `Hola *${clientName}*, ¡tu pedido *${order.id}* de Voreal ya está listo! 📍 Ya puedes retirarlo por nuestro punto de entrega. ¡Te esperamos!`;
@@ -1448,10 +1448,16 @@
                 </a>
             `;
             
-            document.getElementById('modal-delivery-method').textContent = order.client.delivery === 'envio' ? 'Envío a Domicilio/Correo' : 'Retiro por Punto de Entrega';
+            let deliveryText = 'Retiro por Punto Microcentro';
+            if (order.client.delivery === 'moto') deliveryText = 'Envío por Moto (CABA/GBA)';
+            else if (order.client.delivery === 'andreani') deliveryText = 'Andreani a Domicilio';
+            else if (order.client.delivery === 'andreani_sucursal') deliveryText = 'Andreani a Sucursal';
+            else if (order.client.delivery === 'envio') deliveryText = 'Envío a Domicilio/Correo'; // Legacy
+
+            document.getElementById('modal-delivery-method').textContent = deliveryText;
             
             const addressBlock = document.getElementById('modal-address-block');
-            if (order.client.delivery === 'envio') {
+            if (order.client.delivery !== 'retiro') {
                 addressBlock.style.display = 'block';
                 document.getElementById('modal-client-address').textContent = order.client.address;
             } else {
@@ -1664,7 +1670,17 @@
 
             const deliveryMatch = text.match(/Entrega:\*?\s*(.+)/i);
             const deliveryRaw = deliveryMatch ? deliveryMatch[1].trim() : '';
-            const delivery = (deliveryRaw.toLowerCase().includes('envío') || deliveryRaw.toLowerCase().includes('envio')) ? 'envio' : 'retiro';
+            const deliveryRawLower = deliveryRaw.toLowerCase();
+            let delivery = 'retiro';
+            if (deliveryRawLower.includes('moto')) {
+                delivery = 'moto';
+            } else if (deliveryRawLower.includes('andreani') && deliveryRawLower.includes('sucursal')) {
+                delivery = 'andreani_sucursal';
+            } else if (deliveryRawLower.includes('andreani')) {
+                delivery = 'andreani';
+            } else if (deliveryRawLower.includes('envío') || deliveryRawLower.includes('envio')) {
+                delivery = 'andreani'; // legacy
+            }
 
             const addressMatch = text.match(/Dirección:\*?\s*(.+)/i);
             const address = addressMatch ? addressMatch[1].trim() : '';

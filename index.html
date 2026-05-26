@@ -136,45 +136,9 @@
 
             <!-- Right Side: Controls Panel -->
             <div class="controls-panel">
-                <!-- Step 1: Upload Photo -->
-                <div class="control-group" id="step-upload-group">
-                    <h3 class="control-label">1. Sube tu imagen</h3>
-                    <div class="drag-drop-zone" id="drop-zone">
-                        <input type="file" id="image-upload" accept="image/*" class="file-input">
-                        <div class="zone-content">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                            <span class="upload-btn-text">Seleccionar archivo</span>
-                            <span class="upload-helper">o arrastra tu foto aquí</span>
-                        </div>
-                    </div>
-                    <div class="sample-images-container">
-                        <span class="sample-title">O prueba una imagen de muestra:</span>
-                        <div class="sample-images-grid">
-                            <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 1" class="sample-thumb" data-url="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800">
-                            <img src="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=150" alt="Muestra 2" class="sample-thumb" data-url="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=800">
-                            <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 3" class="sample-thumb" data-url="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=800">
-                            <img src="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=150" alt="Muestra 4" class="sample-thumb" data-url="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800">
-                        </div>
-                    </div>
-                    <div class="upload-success-indicator hidden" id="upload-success">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span id="uploaded-filename">Imagen cargada con éxito</span>
-                        <button type="button" class="remove-img-btn" id="remove-img-btn">Cambiar</button>
-                    </div>
-                    <div class="triptych-notice-box hidden" id="triptych-notice">
-                        <p>✨ <strong>¡Todos los modelos disponibles!</strong> Los trípticos se realizan con cualquier diseño o imagen. Haces el pedido y coordinamos/mostramos las opciones directamente por WhatsApp.</p>
-                    </div>
-                </div>
-
-                <!-- Step 2: Select Size / Format -->
+                <!-- Step 1: Select Size / Format -->
                 <div class="control-group">
-                    <h3 class="control-label">2. Elige el tamaño</h3>
+                    <h3 class="control-label">1. Elige el tamaño</h3>
                     <div class="sizes-grid">
                         <!-- CHICOS -->
                         <div class="size-card active" data-size="chico">
@@ -235,6 +199,42 @@
                                 <span class="price-promo">Promo: 2x $100.000</span>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Upload Photo -->
+                <div class="control-group" id="step-upload-group">
+                    <h3 class="control-label">2. Sube tu imagen</h3>
+                    <div class="drag-drop-zone" id="drop-zone">
+                        <input type="file" id="image-upload" accept="image/*" class="file-input">
+                        <div class="zone-content">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span class="upload-btn-text">Seleccionar archivo</span>
+                            <span class="upload-helper">o arrastra tu foto aquí</span>
+                        </div>
+                    </div>
+                    <div class="sample-images-container">
+                        <span class="sample-title">O prueba una imagen de muestra:</span>
+                        <div class="sample-images-grid">
+                            <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 1" class="sample-thumb" data-url="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800">
+                            <img src="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=150" alt="Muestra 2" class="sample-thumb" data-url="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=800">
+                            <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 3" class="sample-thumb" data-url="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=800">
+                            <img src="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=150" alt="Muestra 4" class="sample-thumb" data-url="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800">
+                        </div>
+                    </div>
+                    <div class="upload-success-indicator hidden" id="upload-success">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span id="uploaded-filename">Imagen cargada con éxito</span>
+                        <button type="button" class="remove-img-btn" id="remove-img-btn">Cambiar</button>
+                    </div>
+                    <div class="triptych-notice-box hidden" id="triptych-notice">
+                        <p>✨ <strong>¡Todos los modelos disponibles!</strong> Los trípticos se realizan con cualquier diseño o imagen. Haces el pedido y coordinamos/mostramos las opciones directamente por WhatsApp.</p>
                     </div>
                 </div>
 
@@ -588,8 +588,10 @@
                         <label for="client-delivery">Método de Entrega *</label>
                         <select id="client-delivery" required>
                             <option value="" disabled selected>Selecciona una opción</option>
-                            <option value="envio">Envío a Domicilio / Correo</option>
-                            <option value="retiro">Retirar por Punto de Entrega</option>
+                            <option value="moto">Envío por Moto (CABA/GBA)</option>
+                            <option value="andreani">Andreani a Domicilio</option>
+                            <option value="andreani_sucursal">Andreani a Sucursal</option>
+                            <option value="retiro">Retiro por Punto Microcentro</option>
                         </select>
                     </div>
 

@@ -218,7 +218,7 @@ function initEventListeners() {
 
     // Delivery Method Toggle Address Field
     elements.clientDelivery.addEventListener('change', (e) => {
-        if (e.target.value === 'envio') {
+        if (e.target.value !== 'retiro') {
             elements.addressGroup.classList.remove('hidden');
             elements.clientAddress.setAttribute('required', 'required');
         } else {
@@ -655,8 +655,15 @@ function handleCheckout(e) {
     message += `👤 *Datos del Cliente:*\n`;
     message += `• *Nombre:* ${name}\n`;
     message += `• *WhatsApp:* ${phone}\n`;
-    message += `• *Entrega:* ${deliveryMethod === 'envio' ? 'Envío a Domicilio/Correo' : 'Retiro por Punto de Entrega'}\n`;
-    if (deliveryMethod === 'envio') {
+    let deliveryLabel = '';
+    if (deliveryMethod === 'moto') deliveryLabel = 'Envío por Moto (CABA/GBA)';
+    else if (deliveryMethod === 'andreani') deliveryLabel = 'Andreani a Domicilio';
+    else if (deliveryMethod === 'andreani_sucursal') deliveryLabel = 'Andreani a Sucursal';
+    else if (deliveryMethod === 'retiro') deliveryLabel = 'Retiro por Punto Microcentro';
+    else deliveryLabel = deliveryMethod; // fallback
+
+    message += `• *Entrega:* ${deliveryLabel}\n`;
+    if (deliveryMethod !== 'retiro') {
         message += `• *Dirección:* ${address}\n`;
     }
     message += `\n🛒 *Resumen del Pedido:*\n${orderDetailText}`;
