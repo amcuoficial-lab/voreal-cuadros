@@ -112,11 +112,13 @@ const elements = {
 
 // 3. Initializer
 document.addEventListener('DOMContentLoaded', () => {
+    loadCustomSiteContent();
     loadCartFromStorage();
     initEventListeners();
     updateUI();
     initGalleryCarousels();
     initWhatsAppChatWidget();
+    initVisualEditor();
 });
 
 // 4. Event Listeners Setup
@@ -994,4 +996,229 @@ function initWhatsAppChatWidget() {
         messagesContainer.appendChild(optsDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
+}
+
+// 14. Visual Content Editor logic
+function loadCustomSiteContent() {
+    try {
+        const customHtml = localStorage.getItem('voreal_site_content_html');
+        if (customHtml) {
+            const root = document.getElementById('editable-content-root');
+            if (root) {
+                root.innerHTML = customHtml;
+            }
+        }
+    } catch(e) {
+        console.error("Error loading custom site content HTML", e);
+    }
+}
+
+function initVisualEditor() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('edit')) return;
+
+    // Show Visual Editor Bar
+    const editorBar = document.createElement('div');
+    editorBar.className = 'editor-bar';
+    editorBar.innerHTML = `
+        <div class="editor-bar-content">
+            <span class="editor-title">🖌️ MODO EDICIÓN VOREAL</span>
+            <span class="editor-help">Haz clic en cualquier texto para modificarlo.</span>
+            <div class="editor-actions">
+                <button class="editor-btn btn-save" id="btn-editor-save">💾 Guardar Cambios</button>
+                <button class="editor-btn btn-export" id="btn-editor-export">📥 Exportar index.html</button>
+                <button class="editor-btn btn-cancel" id="btn-editor-cancel">❌ Salir</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(editorBar);
+
+    // Style elements in edit mode
+    const styles = document.createElement('style');
+    styles.innerHTML = `
+        .editor-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #1c1c1c;
+            color: white;
+            padding: 16px 24px;
+            z-index: 100000;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+        .editor-bar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .editor-title {
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #C5A880;
+        }
+        .editor-help {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        .editor-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .editor-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-save {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .btn-save:hover { background-color: #27ae60; }
+        .btn-export {
+            background-color: #3498db;
+            color: white;
+        }
+        .btn-export:hover { background-color: #2980b9; }
+        .btn-cancel {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-cancel:hover { background-color: #c0392b; }
+        
+        /* Editable highlight */
+        .v-editable-active {
+            outline: 1px dashed #C5A880 !important;
+            transition: outline 0.2s ease;
+            cursor: pointer;
+        }
+        .v-editable-active:hover {
+            outline: 2px solid #C5A880 !important;
+            background-color: rgba(197, 168, 128, 0.05) !important;
+        }
+    `;
+    document.head.appendChild(styles);
+
+    // Make elements editable
+    const root = document.getElementById('editable-content-root');
+    if (root) {
+        // Select all text-containing elements
+        const editables = root.querySelectorAll('h1, h2, h3, h4, p, span, li, button, option, label');
+        editables.forEach(el => {
+            // Exclude drag drop zone elements, sample thumbnails, and navigation elements
+            if (el.closest('.drag-drop-zone') || el.closest('.sample-images-container') || el.classList.contains('carousel-nav-btn')) return;
+            
+            // Check if el has direct text content
+            if (el.children.length === 0 || Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '')) {
+                el.contentEditable = "true";
+                el.classList.add('v-editable-active');
+            }
+        });
+    }
+
+    // Save Action
+    document.getElementById('btn-editor-save').addEventListener('click', () => {
+        // Temporarily remove edit outlines before saving
+        const editables = document.querySelectorAll('.v-editable-active');
+        editables.forEach(el => {
+            el.removeAttribute('contenteditable');
+            el.classList.remove('v-editable-active');
+        });
+
+        // Get updated HTML of root
+        const root = document.getElementById('editable-content-root');
+        const customHtml = root.innerHTML;
+
+        // Restore outlines
+        editables.forEach(el => {
+            el.contentEditable = "true";
+            el.classList.add('v-editable-active');
+        });
+
+        try {
+            localStorage.setItem('voreal_site_content_html', customHtml);
+            alert('🎉 ¡Cambios guardados con éxito en este navegador! El sitio cargará esta versión modificada a partir de ahora.');
+        } catch(e) {
+            console.error(e);
+            alert('Error al guardar cambios: ' + e.message);
+        }
+    });
+
+    // Cancel Action
+    document.getElementById('btn-editor-cancel').addEventListener('click', () => {
+        if (confirm('¿Salir del editor? Los cambios no guardados se perderán.')) {
+            window.location.href = window.location.pathname; // Reload without query params
+        }
+    });
+
+    // Export Action
+    document.getElementById('btn-editor-export').addEventListener('click', () => {
+        // Clone document
+        const docClone = document.documentElement.cloneNode(true);
+        
+        // Remove editor bar
+        const cloneBar = docClone.querySelector('.editor-bar');
+        if (cloneBar) cloneBar.remove();
+
+        // Remove visualizer placeholder and restore preview frame visible state
+        const clonePlaceholder = docClone.querySelector('#visualizer-placeholder');
+        if (clonePlaceholder) clonePlaceholder.classList.add('hidden');
+        
+        const clonePreviewFrame = docClone.querySelector('#preview-frame');
+        if (clonePreviewFrame) {
+            clonePreviewFrame.classList.remove('hidden');
+        }
+
+        // Remove contenteditable and helper classes
+        docClone.querySelectorAll('[contenteditable]').forEach(el => {
+            el.removeAttribute('contenteditable');
+        });
+        docClone.querySelectorAll('.v-editable-active').forEach(el => {
+            el.classList.remove('v-editable-active');
+        });
+
+        // Remove active class from sizes (default chico active)
+        docClone.querySelectorAll('.size-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        const chicoCard = docClone.querySelector('.size-card[data-size="chico"]');
+        if (chicoCard) chicoCard.classList.add('active');
+
+        // Hide upload success in output index.html
+        const cloneUploadSuccess = docClone.querySelector('#upload-success');
+        if (cloneUploadSuccess) cloneUploadSuccess.classList.add('hidden');
+
+        const cloneDropZone = docClone.querySelector('#drop-zone');
+        if (cloneDropZone) cloneDropZone.classList.remove('hidden');
+
+        // Hide price action box by default
+        const clonePriceBox = docClone.querySelector('#price-action-box');
+        if (clonePriceBox) clonePriceBox.classList.add('hidden');
+
+        // Construct HTML file content
+        const htmlContent = '<!DOCTYPE html>\n' + docClone.outerHTML;
+
+        // Trigger file download
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'index.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        alert('📥 Se ha descargado tu archivo "index.html" actualizado con los nuevos textos. Reemplaza el archivo original en tu proyecto y súbelo a GitHub para actualizarlo de forma permanente en la web.');
+    });
 }
