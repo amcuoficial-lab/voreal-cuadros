@@ -1436,47 +1436,153 @@ a {
         padding: 4px 0;
     }
     
+    .hero-section {
+        padding: 60px 16px;
+        min-height: auto;
+    }
+
+    .hero-title {
+        font-size: 32px;
+        line-height: 1.25;
+    }
+
+    .hero-subtitle {
+        font-size: 15px;
+        margin-bottom: 24px;
+    }
+
     .hero-cta-group {
         flex-direction: column;
         gap: 12px;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+
+    .hero-cta-group .btn {
+        width: 100%;
     }
     
+    .customizer-section {
+        padding: 30px 0;
+    }
+
+    .customizer-container {
+        padding: 0 12px;
+        gap: 20px;
+    }
+
+    .controls-panel {
+        padding: 20px 16px;
+        gap: 20px;
+    }
+
     .sizes-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
+    }
+
+    .size-card {
+        padding: 12px 10px;
+    }
+
+    .size-name {
+        font-size: 12px;
+    }
+
+    .size-dims {
+        font-size: 10px;
+    }
+
+    .price-single {
+        font-size: 14px;
+    }
+
+    .price-promo {
+        font-size: 9px;
     }
     
     .room-canvas {
-        height: 380px;
+        height: 320px;
     }
     
     .virtual-frame.size-chico {
-        width: 90px;
-        height: 108px;
+        width: 80px;
+        height: 96px;
     }
     
     .virtual-frame.size-clasico {
-        width: 100px;
-        height: 167px;
+        width: 90px;
+        height: 150px;
     }
     
     .virtual-frame.size-grande {
-        width: 160px;
-        height: 192px;
+        width: 130px;
+        height: 156px;
     }
     
     .triptych-frame-container {
-        width: 230px;
-        height: 170px;
-        gap: 6px;
+        width: 190px;
+        height: 140px;
+        gap: 4px;
     }
     
     .triptych-panel {
-        width: 70px;
-        height: 170px;
+        width: 58px;
+        height: 140px;
         border-width: 2px;
         box-shadow: 
             1px 1px 0 #2c2c2c, 
             2px 2px 0 #151515, 
             4px 6px 12px rgba(0, 0, 0, 0.3);
     }
+
+    .triptych-preview-info {
+        padding: 16px;
+        width: 90%;
+    }
+
+    .info-card-content h3 {
+        font-size: 18px;
+    }
+
+    .info-card-content p {
+        font-size: 12px;
+    }
+
+    .gallery-section, .benefits-section, .faq-section {
+        padding: 40px 16px;
+    }
+
+    .section-header {
+        margin-bottom: 24px;
+    }
+
+    .section-title {
+        font-size: 26px;
+    }
+
+    .benefit-card {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .faq-trigger {
+        padding: 16px;
+        font-size: 14px;
+    }
+
+    .faq-content {
+        padding: 0 16px;
+    }
+
+    .faq-item.active .faq-content {
+        padding-bottom: 16px;
+    }
+
+    .cart-drawer {
+        max-width: 100%;
+        right: -100%;
+    }
 }
+

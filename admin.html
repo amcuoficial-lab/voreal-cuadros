@@ -439,8 +439,85 @@
             gap: 24px;
         }
 
+        @media (max-width: 768px) {
+            body {
+                padding: 15px 12px;
+            }
+            
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+                padding-bottom: 15px;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 10px;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            
+            .metric-card {
+                padding: 16px;
+            }
+            
+            .metric-value {
+                font-size: 22px;
+            }
+            
+            .filter-bar {
+                padding: 12px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            
+            .search-box {
+                max-width: 100%;
+                width: 100%;
+            }
+            
+            .status-filters {
+                width: 100%;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding-bottom: 6px;
+                scrollbar-width: none;
+                justify-content: flex-start;
+            }
+            
+            .status-filters::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .filter-tab {
+                flex-shrink: 0;
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            table {
+                min-width: 750px;
+            }
+        }
+
         @media (max-width: 600px) {
             .modal-body-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-box {
+                padding: 20px 16px;
+                width: 95%;
+            }
+            
+            .metrics-grid {
                 grid-template-columns: 1fr;
             }
         }
