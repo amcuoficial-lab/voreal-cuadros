@@ -126,6 +126,17 @@
             transform: translateY(-1px);
         }
 
+        .btn-whatsapp-color {
+            background-color: #25D366 !important;
+            color: white !important;
+        }
+
+        .btn-whatsapp-color:hover {
+            background-color: #1ebd50 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.2);
+        }
+
         /* Metrics Cards */
         .metrics-grid {
             display: grid;
@@ -929,6 +940,35 @@
                 </div>
             </div>
         </div>
+    </div> <!-- Cerrando detail-modal overlay -->
+
+    <!-- WhatsApp Notification Modal -->
+    <div class="modal-overlay" id="whatsapp-modal">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Enviar Actualización del Pedido</h2>
+                <button class="modal-close" id="whatsapp-modal-close">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="detail-block">
+                    <h4>Cliente</h4>
+                    <p id="wa-modal-client-name">-</p>
+                </div>
+                <div class="detail-block">
+                    <h4>Mensaje a Enviar</h4>
+                    <textarea id="wa-modal-textarea" rows="6"
+                              style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-family: var(--font-sans); font-size: 14px; outline: none; resize: vertical; line-height: 1.5;"></textarea>
+                </div>
+                <button class="btn btn-whatsapp-color btn-block" id="btn-send-wa-confirm">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="vertical-align: middle; margin-right: 8px;">
+                        <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.333 4.993L2 22l5.183-1.359a9.95 9.95 0 0 0 4.829 1.243h.005c5.507 0 9.99-4.478 9.99-9.985 0-2.667-1.037-5.176-2.922-7.062A9.935 9.935 0 0 0 12.012 2zm5.718 14.156c-.244.688-1.22 1.25-1.688 1.32-.469.071-.937.137-3.006-.69-2.07-.828-3.395-2.923-3.499-3.061-.103-.137-.827-.978-.827-1.867 0-.889.469-1.32.637-1.5.169-.178.375-.224.498-.224h.356c.12 0 .28.028.43.376.169.39.58 1.411.63 1.512.05.103.08.22.01.356-.07.138-.11.23-.22.356-.11.13-.23.29-.33.39-.11.1-.22.21-.09.43.129.224.58 1.012 1.25 1.61.859.767 1.583.996 1.808 1.103.225.11.356.09.488-.06.13-.15.56-.65.71-.87.15-.22.3-.18.5-.1.21.08 1.32.62 1.55.73.23.11.38.16.44.27.06.1.06.59-.18 1.28z"/>
+                    </svg>
+                    Enviar por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Import Modal -->
     <div class="modal-overlay" id="import-modal">
         <div class="modal-box" style="max-width: 500px;">
@@ -1150,6 +1190,48 @@
             document.getElementById('detail-modal').addEventListener('click', (e) => {
                 if (e.target.id === 'detail-modal') closeModal();
             });
+
+            // WhatsApp Notification Modal Close Listeners
+            const waModal = document.getElementById('whatsapp-modal');
+            const waModalClose = document.getElementById('whatsapp-modal-close');
+            const btnSendWaConfirm = document.getElementById('btn-send-wa-confirm');
+            const waTextarea = document.getElementById('wa-modal-textarea');
+
+            if (waModalClose) {
+                waModalClose.addEventListener('click', () => {
+                    waModal.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            if (waModal) {
+                waModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'whatsapp-modal') {
+                        waModal.classList.remove('open');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            if (btnSendWaConfirm) {
+                btnSendWaConfirm.addEventListener('click', () => {
+                    const phone = btnSendWaConfirm.dataset.phone;
+                    const text = waTextarea.value.trim();
+                    
+                    if (!phone) {
+                        alert('Número de teléfono inválido.');
+                        return;
+                    }
+                    
+                    const formattedPhone = formatPhoneForWa(phone);
+                    const encodedText = encodeURIComponent(text);
+                    const url = `https://wa.me/${formattedPhone}?text=${encodedText}`;
+                    
+                    window.open(url, '_blank');
+                    waModal.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            }
         }
 
         function updateDashboard() {
@@ -1250,13 +1332,18 @@
                         </div>
                     </td>
                     <td>
-                        <div class="status-wrapper">
-                            <select class="${statusClass}" onchange="changeOrderStatus('${order.id}', this.value)">
+                        <div class="status-wrapper" style="display: flex; align-items: center; gap: 8px;">
+                            <select id="status-select-${order.id}" class="${statusClass}" onchange="changeOrderStatus('${order.id}', this.value)">
                                 <option value="Pendiente" ${order.status === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
                                 <option value="En Producción" ${order.status === 'En Producción' ? 'selected' : ''}>En Producción</option>
                                 <option value="Enviado" ${order.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
                                 <option value="Completado" ${order.status === 'Completado' ? 'selected' : ''}>Completado</option>
                             </select>
+                            <button class="btn-action-icon" onclick="openWhatsappNotify('${order.id}', document.getElementById('status-select-${order.id}').value)" title="Enviar notificación por WhatsApp" style="color: #25d366; display: inline-flex; padding: 4px; border: none; background: transparent; cursor: pointer;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.86.002-2.63-1.023-5.101-2.887-6.968C16.582 1.91 14.11 1.887 11.478 1.887c-5.438 0-9.862 4.42-9.866 9.861-.001 1.762.461 3.483 1.337 5.004L1.93 22.064l5.348-1.402c1.603.876 3.4.137 5.176.137zm11.215-4.792c-.3-.149-1.786-.882-2.057-.981-.273-.099-.471-.148-.669.149-.197.297-.767.98-.94 1.179-.173.197-.347.222-.647.073-.3-.15-1.266-.467-2.41-1.488-.891-.795-1.493-1.777-1.667-2.074-.173-.297-.018-.458.13-.606.134-.133.3-.347.45-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.786-.731 2.034-1.438.248-.706.248-1.312.173-1.438-.075-.125-.272-.198-.57-.347z"/>
+                                </svg>
+                            </button>
                         </div>
                     </td>
                     <td>
@@ -1295,7 +1382,48 @@
                 order.status = newStatus;
                 saveOrdersToStorage();
                 updateDashboard(); // Recalcula métricas y vuelve a renderizar la tabla para actualizar filtros y clases CSS de color
+                
+                // Abrir diálogo de WhatsApp para notificar el cambio
+                setTimeout(() => {
+                    openWhatsappNotify(orderId, newStatus);
+                }, 150);
             }
+        };
+
+        window.openWhatsappNotify = function(orderId, status) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const clientName = order.client.name;
+            const phone = order.client.phone;
+            const totalStr = formatPrice(order.finalTotal);
+            
+            let message = '';
+            
+            if (status === 'Pendiente') {
+                message = `Hola *${clientName}*, te saluda el equipo de *Voreal*. Recibimos tu pedido *${order.id}* por un total de *${totalStr}*. Estamos confirmando los detalles y las fotos para dar inicio. ¡Muchas gracias por tu compra! ✨`;
+            } else if (status === 'En Producción') {
+                message = `¡Buenas noticias, *${clientName}*! Tu pedido *${order.id}* de Voreal ya ingresó a producción. Te avisaremos por este medio apenas esté terminado. 🎨`;
+            } else if (status === 'Enviado') {
+                message = `Hola *${clientName}*, te informamos que tu pedido *${order.id}* de Voreal ya fue despachado. 📦 En breve te compartimos los detalles de seguimiento.`;
+            } else if (status === 'Completado') {
+                if (order.client.delivery === 'envio') {
+                    message = `Hola *${clientName}*, tu pedido *${order.id}* de Voreal ya fue entregado con éxito. 🎉 ¡Esperamos que te encante tanto como a nosotros fabricarlo!`;
+                } else {
+                    message = `Hola *${clientName}*, ¡tu pedido *${order.id}* de Voreal ya está listo! 📍 Ya puedes retirarlo por nuestro punto de entrega. ¡Te esperamos!`;
+                }
+            }
+
+            document.getElementById('wa-modal-client-name').textContent = `${clientName} (${phone})`;
+            document.getElementById('wa-modal-textarea').value = message;
+            
+            // Store phone details in dataset for the confirm button
+            const sendBtn = document.getElementById('btn-send-wa-confirm');
+            sendBtn.dataset.phone = phone;
+            
+            // Show modal
+            document.getElementById('whatsapp-modal').classList.add('open');
+            document.body.style.overflow = 'hidden';
         };
 
         window.deleteOrder = function(orderId) {
