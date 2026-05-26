@@ -6,7 +6,8 @@ const state = {
     currentRoom: 'living', // living, bedroom, studio, clean
     uploadedImage: null,   // base64 image data url
     uploadedFilename: '', // original image filename
-    cart: []              // array of cart items
+    cart: [],              // array of cart items
+    rotated: false         // frame orientation: false=portrait, true=landscape
 };
 
 // Pricing Configuration
@@ -251,7 +252,7 @@ function initEventListeners() {
     // Checkout Form Submission
     elements.checkoutForm.addEventListener('submit', handleCheckout);
 
-    // Direct WhatsApp Button for Triptychs (Triptychs are processed directly via WhatsApp)
+    // Direct WhatsApp Button for Triptychs
     elements.whatsappDirectBtn.addEventListener('click', () => {
         const size = state.selectedSize;
         const config = PRICING[size];
@@ -260,6 +261,12 @@ function initEventListeners() {
         const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedText}`;
         window.open(whatsappUrl, '_blank');
     });
+
+    // Frame rotation button
+    const rotateBtn = document.getElementById('rotate-frame-btn');
+    if (rotateBtn) {
+        rotateBtn.addEventListener('click', toggleFrameRotation);
+    }
 }
 
 // 5. Image Handler
@@ -346,36 +353,35 @@ function updateCustomizerDimensions() {
     const size = state.selectedSize;
     
     if (!size) {
-        // No size selected yet
         if (elements.visualizerPlaceholder) elements.visualizerPlaceholder.classList.remove('hidden');
         if (elements.previewFrame) elements.previewFrame.classList.add('hidden');
         if (elements.previewTriptych) elements.previewTriptych.classList.add('hidden');
         if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.add('hidden');
         if (elements.stepUploadGroup) elements.stepUploadGroup.classList.add('hidden');
         if (elements.priceActionBox) elements.priceActionBox.classList.add('hidden');
+        // Hide rotate controls when no size selected
+        const rotCtrl = document.getElementById('rotate-controls');
+        if (rotCtrl) rotCtrl.classList.add('hidden');
         return;
     }
     
-    // Size selected
     if (elements.visualizerPlaceholder) elements.visualizerPlaceholder.classList.add('hidden');
     if (elements.priceActionBox) elements.priceActionBox.classList.remove('hidden');
     
     const config = PRICING[size];
     
-    // Update labels
     elements.selectedSummarySize.textContent = config.name;
     elements.currentUnitPrice.textContent = formatPrice(config.unitPrice);
     
-    // Reset sizes classes
+    // Reset frame classes
     elements.previewFrame.className = 'virtual-frame single-frame';
     
     if (size.startsWith('triptico_')) {
         elements.previewFrame.classList.add('hidden');
-        elements.previewTriptych.classList.add('hidden'); // Ocultado para que no se muestren los paneles vacíos
-        if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.remove('hidden'); // Mostrar aviso de WS
+        elements.previewTriptych.classList.add('hidden');
+        if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.remove('hidden');
         
         let label = '3 paneles';
-
         if (size === 'triptico_clasico') label = '3 paneles (3x 30x50 cm - total 1x50 cm)';
         if (size === 'triptico_grande') label = '3 paneles (3x 50x60 cm)';
         elements.scaleText.textContent = label;
@@ -384,21 +390,75 @@ function updateCustomizerDimensions() {
         if (elements.stepUploadGroup) elements.stepUploadGroup.classList.add('hidden');
         if (elements.addToCartBtn) elements.addToCartBtn.classList.add('hidden');
         if (elements.whatsappDirectBtn) elements.whatsappDirectBtn.classList.remove('hidden');
+        
+        // Hide rotate for triptychs
+        const rotCtrl = document.getElementById('rotate-controls');
+        if (rotCtrl) rotCtrl.classList.add('hidden');
+        state.rotated = false;
     } else {
         elements.previewTriptych.classList.add('hidden');
         if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.add('hidden');
         elements.previewFrame.classList.remove('hidden');
         elements.previewFrame.classList.add(`size-${size}`);
+        
+        // Apply rotation if active
+        if (state.rotated) {
+            elements.previewFrame.classList.add('rotated');
+        }
+        
         if (elements.triptychNotice) elements.triptychNotice.classList.add('hidden');
         if (elements.stepUploadGroup) elements.stepUploadGroup.classList.remove('hidden');
         if (elements.addToCartBtn) elements.addToCartBtn.classList.remove('hidden');
         if (elements.whatsappDirectBtn) elements.whatsappDirectBtn.classList.add('hidden');
         
-        let label = '';
-        if (size === 'chico') label = '25x30 cm (Chico)';
-        if (size === 'clasico') label = '30x50 cm (Clásico)';
-        if (size === 'grande') label = '50x60 cm (Grande)';
-        elements.scaleText.textContent = label;
+        // Show rotate controls
+        const rotCtrl = document.getElementById('rotate-controls');
+        if (rotCtrl) rotCtrl.classList.remove('hidden');
+        
+        // Update scale text with orientation
+        const orientation = state.rotated ? 'Horizontal' : 'Vertical';
+        let dims = '';
+        if (size === 'chico') dims = state.rotated ? '30x25 cm' : '25x30 cm';
+        if (size === 'clasico') dims = state.rotated ? '50x30 cm' : '30x50 cm';
+        if (size === 'grande') dims = state.rotated ? '60x50 cm' : '50x60 cm';
+        elements.scaleText.textContent = `${dims} (• ${orientation})`;
+        
+        // Update orientation badge
+        const badge = document.getElementById('orientation-badge');
+        if (badge) badge.textContent = state.rotated ? '📵 Horizontal' : '📐 Vertical';
+    }
+}
+
+// Rotate frame toggle
+function toggleFrameRotation() {
+    if (!state.selectedSize || state.selectedSize.startsWith('triptico_')) return;
+    
+    state.rotated = !state.rotated;
+    
+    const frame = elements.previewFrame;
+    if (state.rotated) {
+        frame.classList.add('rotated');
+    } else {
+        frame.classList.remove('rotated');
+    }
+    
+    // Update size label and badge
+    const size = state.selectedSize;
+    let dims = '';
+    if (size === 'chico') dims = state.rotated ? '30x25 cm' : '25x30 cm';
+    if (size === 'clasico') dims = state.rotated ? '50x30 cm' : '30x50 cm';
+    if (size === 'grande') dims = state.rotated ? '60x50 cm' : '50x60 cm';
+    
+    elements.scaleText.textContent = `${dims} (• ${state.rotated ? 'Horizontal' : 'Vertical'})`;
+    
+    const badge = document.getElementById('orientation-badge');
+    if (badge) badge.textContent = state.rotated ? '📵 Horizontal' : '📐 Vertical';
+    
+    // Animate the rotate button icon
+    const btn = document.getElementById('rotate-frame-btn');
+    if (btn) {
+        btn.style.transform = 'rotate(180deg)';
+        setTimeout(() => { btn.style.transform = ''; }, 300);
     }
 }
 
@@ -680,8 +740,9 @@ function handleCheckout(e) {
     if (deliveryMethod === 'moto') deliveryLabel = 'Envío por Moto (CABA/GBA)';
     else if (deliveryMethod === 'andreani') deliveryLabel = 'Andreani a Domicilio';
     else if (deliveryMethod === 'andreani_sucursal') deliveryLabel = 'Andreani a Sucursal';
-    else if (deliveryMethod === 'retiro') deliveryLabel = 'Retiro por Punto Microcentro';
-    else deliveryLabel = deliveryMethod; // fallback
+    else if (deliveryMethod === 'retiro') deliveryLabel = 'Retiro por Punto Microcentro (CABA)';
+    else if (deliveryMethod === 'retiro_olavarria') deliveryLabel = 'Retiro por Punto Olavarría (Bs. As.)';
+    else deliveryLabel = deliveryMethod;
 
     message += `• *Entrega:* ${deliveryLabel}\n`;
     if (deliveryMethod !== 'retiro') {
@@ -888,7 +949,7 @@ function initWhatsAppChatWidget() {
                 appendMessage(botText, 'received');
                 showQuickOptions();
             } else if (option === 'envios') {
-                botText = `Nuestros métodos de envío y plazos son los siguientes: 👇\n\n• 🛠️ **Fabricación**: Demoramos exactamente **7 días** de corrido en producir tu cuadro desde que confirmamos las fotos.\n• 🛵 **Moto (CABA/GBA)**: Envío express directo a tu puerta.\n• 📦 **Andreani (A Domicilio)**: Enviamos a cualquier rincón de Argentina.\n• 🏪 **Andreani (A Sucursal)**: Retirás en la sucursal Andreani que prefieras.\n• 📍 **Punto de Retiro gratis**: Podés retirar sin cargo por Microcentro (CABA) coordinando día y horario.`;
+                botText = `Nuestros métodos de envío y plazos son los siguientes: 👇\n\n• 🛠️ **Fabricación**: Demoramos exactamente **7 días** de corrido en producir tu cuadro desde que confirmamos las fotos.\n• 🛵 **Moto (CABA/GBA)**: Envío express directo a tu puerta.\n• 📦 **Andreani (A Domicilio)**: Enviamos a cualquier rincón de Argentina.\n• 🏪 **Andreani (A Sucursal)**: Retirás en la sucursal Andreani que prefieras.\n• 📍 **Retiro gratis — Microcentro (CABA)**: Coordinando día y horario.\n• 📍 **Retiro gratis — Olavarría (Bs. As.)**: También podés retirar en Olavarría sin cargo.`;
                 appendMessage(botText, 'received');
                 showQuickOptions();
             } else if (option === 'precios') {
@@ -926,7 +987,7 @@ function initWhatsAppChatWidget() {
             } else if (textLower.includes('material') || textLower.includes('madera') || textLower.includes('calidad') || textLower.includes('como son') || textLower.includes('bastidor') || textLower.includes('bastidores') || textLower.includes('paneles')) {
                 botText = `🎨 **Calidad de Galería Premium:**\nNuestros cuadros son de **alta definición montados en madera listos para colgar**. Son impresiones ultra-nítidas de colores vibrantes acopladas a bastidores de madera livianos. Vienen listos con colgadores o adhesivos premium para que los coloques sin necesidad de clavar la pared.`;
             } else if (textLower.includes('envio') || textLower.includes('envío') || textLower.includes('andreani') || textLower.includes('moto') || textLower.includes('sucursal') || textLower.includes('correo') || textLower.includes('despacho')) {
-                botText = `🚚 **Métodos de Envío en Argentina:**\n\n• 🛵 **Moto Express**: Entregas rápidas en CABA y Gran Buenos Aires.\n• 📦 **Andreani a Domicilio**: A cualquier código postal del país.\n• 🏪 **Andreani a Sucursal**: Ideal para retirar cuando tengas tiempo.\n• 📍 **Punto de Retiro**: Podés retirar gratis en Microcentro coordinando previamente con nosotros.`;
+                botText = `🚚 **Métodos de Envío en Argentina:**\n\n• 🛵 **Moto Express**: Entregas rápidas en CABA y Gran Buenos Aires.\n• 📦 **Andreani a Domicilio**: A cualquier código postal del país.\n• 🏪 **Andreani a Sucursal**: Ideal para retirar cuando tengas tiempo.\n• 📍 **Retiro Microcentro (CABA)**: Retirarás gratis coordinando previamente.\n• 📍 **Retiro Olavarría (Bs. As.)**: También podés retirar sin cargo en Olavarría, Buenos Aires.`;
             } else if (textLower.includes('tiempo') || textLower.includes('tardan') || textLower.includes('demora') || textLower.includes('plazo') || textLower.includes('fabricacion') || textLower.includes('fabricación') || textLower.includes('cuanto demora') || textLower.includes('cuánto demora')) {
                 botText = `⏱️ **Tiempos de Fabricación y Entrega:**\nLa producción demora exactamente **7 días** desde el momento en que confirmamos las fotos del pedido por WhatsApp. Posteriormente se realiza el despacho o retiro.`;
             } else if (textLower.includes('humano') || textLower.includes('agente') || textLower.includes('vendedor') || textLower.includes('asesor') || textLower.includes('whatsapp') || textLower.includes('wsap') || textLower.includes('contacto') || textLower.includes('hablar')) {

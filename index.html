@@ -80,12 +80,76 @@
         <div class="section-header">
             <span class="section-tag">Estudio Creativo</span>
             <h2 class="section-title">Personaliza tu Cuadro</h2>
-            <p class="section-description">Carga tu foto, selecciona la medida ideal y mira en tiempo real cómo lucirá en tu hogar.</p>
+            <p class="section-description">Elegí el tamaño, mirá cómo luce en tu pared y subí tu foto favorita.</p>
         </div>
 
         <div class="customizer-container">
-            <!-- Left Side: Interactive Preview Canvas & Room Background -->
-            <div class="preview-panel">
+
+            <!-- PASO 1: Elige el tamaño (full width arriba) -->
+            <div class="cust-block cust-block--sizes">
+                <h3 class="control-label step-label"><span class="step-num">1</span> Elige el tamaño</h3>
+                <div class="sizes-grid">
+                    <!-- CHICOS -->
+                    <div class="size-card" data-size="chico">
+                        <div class="size-card-header">
+                            <span class="size-name">CHICOS</span>
+                            <span class="size-dims">25x30 cm</span>
+                        </div>
+                        <div class="size-pricing">
+                            <span class="price-single">$10.000</span>
+                            <span class="price-promo">Promo: 3x $25.000</span>
+                        </div>
+                    </div>
+                    <!-- CLASICO -->
+                    <div class="size-card" data-size="clasico">
+                        <div class="size-card-header">
+                            <span class="size-name">CLÁSICO</span>
+                            <span class="size-dims">30x50 cm</span>
+                        </div>
+                        <div class="size-pricing">
+                            <span class="price-single">$15.000</span>
+                            <span class="price-promo">Promo: 3x $30.000</span>
+                        </div>
+                    </div>
+                    <!-- GRANDE -->
+                    <div class="size-card" data-size="grande">
+                        <div class="size-card-header">
+                            <span class="size-name">GRANDE</span>
+                            <span class="size-dims">50x60 cm</span>
+                        </div>
+                        <div class="size-pricing">
+                            <span class="price-single">$25.000</span>
+                            <span class="price-promo">Promo: 2x $40.000</span>
+                        </div>
+                    </div>
+                    <!-- TRÍPTICO CLÁSICO -->
+                    <div class="size-card" data-size="triptico_clasico">
+                        <div class="size-card-header">
+                            <span class="size-name">TRÍPTICO CLÁSICO</span>
+                            <span class="size-dims">3x 30x50 cm (total 1x50 cm)</span>
+                        </div>
+                        <div class="size-pricing">
+                            <span class="price-single">$35.000</span>
+                            <span class="price-promo">Promo: 2x $60.000</span>
+                        </div>
+                    </div>
+                    <!-- TRÍPTICO GRANDE -->
+                    <div class="size-card" data-size="triptico_grande">
+                        <div class="size-card-header">
+                            <span class="size-name">TRÍPTICO GRANDE</span>
+                            <span class="size-dims">3x 50x60 cm</span>
+                        </div>
+                        <div class="size-pricing">
+                            <span class="price-single">$55.000</span>
+                            <span class="price-promo">Promo: 2x $100.000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 2: Visualización (centrada debajo del tamaño) -->
+            <div class="cust-block cust-block--preview">
+                <h3 class="control-label step-label"><span class="step-num">2</span> Visualiza tu cuadro</h3>
                 <div class="room-canvas" id="room-canvas" data-current-room="clean">
                     <!-- Virtual hanging frame(s) -->
                     <div class="virtual-frame-container" id="frame-container">
@@ -95,9 +159,8 @@
                                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                 <polyline points="9 17 9 12 15 12 15 17"></polyline>
                             </svg>
-                            <p>Elige un tamaño para comenzar a diseñar tu cuadro</p>
+                            <p>Elige un tamaño para comenzar</p>
                         </div>
-
                         <!-- Standard single frame preview -->
                         <div class="virtual-frame single-frame shadow-3d hidden" id="preview-frame">
                             <div class="frame-content" id="frame-content">
@@ -111,8 +174,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Triptych preview (hidden by default, shown when Triptico size is selected) -->
+                        <!-- Triptych preview -->
                         <div class="triptych-frame-container hidden" id="preview-triptych">
                             <div class="virtual-frame triptych-panel shadow-3d panel-left">
                                 <div class="frame-content panel-content" id="panel-1"></div>
@@ -124,7 +186,6 @@
                                 <div class="frame-content panel-content" id="panel-3"></div>
                             </div>
                         </div>
-
                         <!-- Triptych WhatsApp Preview Placeholder Card -->
                         <div class="triptych-preview-info hidden" id="triptych-preview-info">
                             <div class="info-card-content">
@@ -137,120 +198,63 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Size Indicator Badge -->
                     <div class="scale-indicator" id="scale-indicator">
-                        Medida aproximada: <span id="scale-text">25x30 cm (Chico)</span>
+                        Medida: <span id="scale-text">—</span>
                     </div>
+                </div>
+                <!-- Rotate Controls Bar (only for non-triptych sizes) -->
+                <div class="rotate-controls hidden" id="rotate-controls">
+                    <button class="rotate-btn" id="rotate-frame-btn" title="Cambiar orientación del cuadro">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 .49-4.95"></path>
+                        </svg>
+                        Girar orientación
+                    </button>
+                    <span class="orientation-badge" id="orientation-badge">📐 Vertical</span>
                 </div>
             </div>
 
-            <!-- Right Side: Controls Panel -->
-            <div class="controls-panel">
-                <!-- Step 1: Select Size / Format -->
-                <div class="control-group">
-                    <h3 class="control-label">1. Elige el tamaño</h3>
-                    <div class="sizes-grid">
-                        <!-- CHICOS -->
-                        <div class="size-card" data-size="chico">
-                            <div class="size-card-header">
-                                <span class="size-name">CHICOS</span>
-                                <span class="size-dims">25x30 cm</span>
-                            </div>
-                            <div class="size-pricing">
-                                <span class="price-single">$10.000</span>
-                                <span class="price-promo">Promo: 3x $25.000</span>
-                            </div>
-                        </div>
-
-                        <!-- CLASICO -->
-                        <div class="size-card" data-size="clasico">
-                            <div class="size-card-header">
-                                <span class="size-name">CLÁSICO</span>
-                                <span class="size-dims">30x50 cm</span>
-                            </div>
-                            <div class="size-pricing">
-                                <span class="price-single">$15.000</span>
-                                <span class="price-promo">Promo: 3x $30.000</span>
-                            </div>
-                        </div>
-
-                        <!-- GRANDE -->
-                        <div class="size-card" data-size="grande">
-                            <div class="size-card-header">
-                                <span class="size-name">GRANDE</span>
-                                <span class="size-dims">50x60 cm</span>
-                            </div>
-                            <div class="size-pricing">
-                                <span class="price-single">$25.000</span>
-                                <span class="price-promo">Promo: 2x $40.000</span>
-                            </div>
-                        </div>
-
-
-                        <!-- TRIPTICOS -->
-                        <div class="size-card" data-size="triptico_clasico">
-                            <div class="size-card-header">
-                                <span class="size-name">TRÍPTICO CLÁSICO</span>
-                                <span class="size-dims">3x 30x50 cm (total 1x50 cm)</span>
-                            </div>
-                            <div class="size-pricing">
-                                <span class="price-single">$35.000</span>
-                                <span class="price-promo">Promo: 2x $60.000</span>
-                            </div>
-                        </div>
-
-                        <div class="size-card" data-size="triptico_grande">
-                            <div class="size-card-header">
-                                <span class="size-name">TRÍPTICO GRANDE</span>
-                                <span class="size-dims">3x 50x60 cm</span>
-                            </div>
-                            <div class="size-pricing">
-                                <span class="price-single">$55.000</span>
-                                <span class="price-promo">Promo: 2x $100.000</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 2: Upload Photo -->
-                <div class="control-group" id="step-upload-group">
-                    <h3 class="control-label">2. Sube tu imagen</h3>
-                    <div class="drag-drop-zone" id="drop-zone">
-                        <input type="file" id="image-upload" accept="image/*" class="file-input">
-                        <div class="zone-content">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                            <span class="upload-btn-text">Seleccionar archivo</span>
-                            <span class="upload-helper">o arrastra tu foto aquí</span>
-                        </div>
-                    </div>
-                    <div class="sample-images-container">
-                        <span class="sample-title">O prueba una imagen de muestra:</span>
-                        <div class="sample-images-grid">
-                            <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 1" class="sample-thumb" data-url="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800">
-                            <img src="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=150" alt="Muestra 2" class="sample-thumb" data-url="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=800">
-                            <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 3" class="sample-thumb" data-url="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=800">
-                            <img src="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=150" alt="Muestra 4" class="sample-thumb" data-url="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800">
-                        </div>
-                    </div>
-                    <div class="upload-success-indicator hidden" id="upload-success">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
+            <!-- PASO 3: Subir imagen -->
+            <div class="cust-block cust-block--upload" id="step-upload-group">
+                <h3 class="control-label step-label"><span class="step-num">3</span> Sube tu imagen</h3>
+                <div class="drag-drop-zone" id="drop-zone">
+                    <input type="file" id="image-upload" accept="image/*" class="file-input">
+                    <div class="zone-content">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
-                        <span id="uploaded-filename">Imagen cargada con éxito</span>
-                        <button type="button" class="remove-img-btn" id="remove-img-btn">Cambiar</button>
-                    </div>
-                    <div class="triptych-notice-box hidden" id="triptych-notice">
-                        <p>✨ <strong>¡Todos los modelos disponibles!</strong> Los trípticos se realizan con cualquier diseño o imagen. Haces el pedido y coordinamos/mostramos las opciones directamente por WhatsApp.</p>
+                        <span class="upload-btn-text">Seleccionar archivo</span>
+                        <span class="upload-helper">o arrastra tu foto aquí</span>
                     </div>
                 </div>
+                <div class="sample-images-container">
+                    <span class="sample-title">O prueba una imagen de muestra:</span>
+                    <div class="sample-images-grid">
+                        <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 1" class="sample-thumb" data-url="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800">
+                        <img src="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=150" alt="Muestra 2" class="sample-thumb" data-url="https://images.unsplash.com/photo-1547891654-e66ed7edd96c?auto=format&fit=crop&q=80&w=800">
+                        <img src="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=150" alt="Muestra 3" class="sample-thumb" data-url="https://images.unsplash.com/photo-1536924940846-227afb31e2a5?auto=format&fit=crop&q=80&w=800">
+                        <img src="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=150" alt="Muestra 4" class="sample-thumb" data-url="https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800">
+                    </div>
+                </div>
+                <div class="upload-success-indicator hidden" id="upload-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span id="uploaded-filename">Imagen cargada con éxito</span>
+                    <button type="button" class="remove-img-btn" id="remove-img-btn">Cambiar</button>
+                </div>
+                <div class="triptych-notice-box hidden" id="triptych-notice">
+                    <p>✨ <strong>¡Todos los modelos disponibles!</strong> Los trípticos se realizan con cualquier diseño o imagen. Haces el pedido y coordinamos/mostramos las opciones directamente por WhatsApp.</p>
+                </div>
+            </div>
 
-                <!-- Price Summary & Add to Cart -->
-                <div class="price-action-box">
+            <!-- PASO 4: Precio y Carrito -->
+            <div class="cust-block cust-block--price">
+                <div class="price-action-box" id="price-action-box">
                     <div class="price-summary">
                         <div class="price-row">
                             <span>Medida seleccionada:</span>
@@ -273,6 +277,7 @@
                     <p class="promo-hint">💡 Los descuentos por cantidad se aplicarán automáticamente en el carrito.</p>
                 </div>
             </div>
+
         </div>
     </section>
 
@@ -602,7 +607,8 @@
                             <option value="moto">Envío por Moto (CABA/GBA)</option>
                             <option value="andreani">Andreani a Domicilio</option>
                             <option value="andreani_sucursal">Andreani a Sucursal</option>
-                            <option value="retiro">Retiro por Punto Microcentro</option>
+                            <option value="retiro">Retiro por Punto Microcentro (CABA)</option>
+                            <option value="retiro_olavarria">Retiro por Punto Olavarría (Bs. As.)</option>
                         </select>
                     </div>
 

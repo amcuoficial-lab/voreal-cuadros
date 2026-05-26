@@ -342,18 +342,148 @@ a {
 }
 
 .customizer-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
     padding: 0 24px;
+    max-width: 860px;
+    margin: 0 auto;
 }
 
-/* Left Side: Preview */
+/* cust-block: each step section */
+.cust-block {
+    width: 100%;
+    background-color: var(--white);
+    border-radius: 14px;
+    padding: 28px 32px;
+    box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border-color);
+}
+
+.cust-block--preview {
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cust-block--price {
+    background: linear-gradient(135deg, #1C1C1C 0%, #2d2d2d 100%);
+    border: none;
+}
+
+.cust-block--price .price-row {
+    color: rgba(255,255,255,0.7);
+}
+
+.cust-block--price .price-row.total-row {
+    color: white;
+    border-top-color: rgba(255,255,255,0.15);
+}
+
+.cust-block--price .price-amount {
+    color: var(--accent-gold);
+}
+
+.cust-block--price .promo-hint {
+    color: rgba(255,255,255,0.5);
+}
+
+/* Step label with number circle */
+.step-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px !important;
+}
+
+.step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--accent-gold);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    flex-shrink: 0;
+}
+
+.cust-block--price .step-num {
+    background-color: white;
+    color: var(--text-primary);
+}
+
+/* Rotate button controls row */
+.rotate-controls {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+}
+
+.rotate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    background: var(--bg-secondary);
+    border: 1.5px solid var(--border-color);
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.3px;
+}
+
+.rotate-btn:hover {
+    border-color: var(--accent-gold);
+    background: rgba(197,168,128,0.08);
+    color: var(--accent-gold-dark);
+    transform: translateY(-1px);
+}
+
+.orientation-badge {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    letter-spacing: 0.3px;
+}
+
+/* Rotated (Landscape) frame sizes */
+.virtual-frame.size-chico.rotated {
+    width: 144px;   /* 30 units */
+    height: 120px;  /* 25 units — swapped */
+}
+
+.virtual-frame.size-clasico.rotated {
+    width: 240px;   /* 50 units */
+    height: 144px;  /* 30 units — swapped */
+}
+
+.virtual-frame.size-grande.rotated {
+    width: 288px;   /* 60 units */
+    height: 240px;  /* 50 units — swapped */
+}
+
+/* Legacy: preview-panel still used by JS refs */
 .preview-panel {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
 
 .room-canvas {
     height: 480px;
@@ -593,7 +723,7 @@ a {
     margin: 0;
 }
 
-/* Right Side: Controls Styling */
+/* Controls panel legacy (kept for editor compat) */
 .controls-panel {
     background-color: var(--white);
     padding: 32px;
@@ -602,6 +732,12 @@ a {
     display: flex;
     flex-direction: column;
     gap: 28px;
+}
+
+/* Price action box inside dark block */
+.cust-block--price .price-action-box {
+    border-top: none;
+    padding-top: 0;
 }
 
 .control-label {
