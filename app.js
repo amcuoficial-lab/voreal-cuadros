@@ -771,41 +771,49 @@ function initGalleryCarousels() {
         const carousel = item.querySelector('.gallery-carousel');
         if (!carousel) return;
 
-        const slides = carousel.querySelectorAll('.carousel-slide');
         const prevBtn = item.querySelector('.prev-btn');
         const nextBtn = item.querySelector('.next-btn');
-        if (!slides.length || !prevBtn || !nextBtn) return;
+        if (!prevBtn || !nextBtn) return;
 
-        let index = 0;
-
-        function showSlide(newIndex) {
-            slides[index].classList.remove('active');
-            index = (newIndex + slides.length) % slides.length;
-            slides[index].classList.add('active');
+        function showSlide(direction) {
+            const currentSlides = carousel.querySelectorAll('.carousel-slide');
+            if (currentSlides.length === 0) return;
+            
+            let activeIdx = Array.from(currentSlides).findIndex(s => s.classList.contains('active'));
+            if (activeIdx === -1) {
+                // If no slide is active, make the first one active
+                currentSlides[0].classList.add('active');
+                return;
+            }
+            
+            currentSlides[activeIdx].classList.remove('active');
+            
+            const nextIdx = (activeIdx + direction + currentSlides.length) % currentSlides.length;
+            currentSlides[nextIdx].classList.add('active');
         }
 
         prevBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            showSlide(index - 1);
+            showSlide(-1);
         });
 
         nextBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            showSlide(index + 1);
+            showSlide(1);
         });
         
         // Auto play every 5 seconds
         let interval = setInterval(() => {
-            showSlide(index + 1);
+            showSlide(1);
         }, 4000 + Math.random() * 2000); // offset intervals to look natural
         
         // Pause auto play on hover
         item.addEventListener('mouseenter', () => clearInterval(interval));
         item.addEventListener('mouseleave', () => {
             interval = setInterval(() => {
-                showSlide(index + 1);
+                showSlide(1);
             }, 5000);
         });
     });
@@ -1013,6 +1021,7 @@ function loadCustomSiteContent() {
     }
 }
 
+
 function initVisualEditor() {
     const urlParams = new URLSearchParams(window.location.search);
     if (!urlParams.has('edit')) return;
@@ -1023,7 +1032,7 @@ function initVisualEditor() {
     editorBar.innerHTML = `
         <div class="editor-bar-content">
             <span class="editor-title">🖌️ MODO EDICIÓN VOREAL</span>
-            <span class="editor-help">Haz clic en cualquier texto para modificarlo.</span>
+            <span class="editor-help">Haz clic en cualquier texto para modificarlo, o gestiona las fotos de los carruseles.</span>
             <div class="editor-actions">
                 <button class="editor-btn btn-save" id="btn-editor-save">💾 Guardar Cambios</button>
                 <button class="editor-btn btn-export" id="btn-editor-export">📥 Exportar index.html</button>
@@ -1106,6 +1115,66 @@ function initVisualEditor() {
             outline: 2px solid #C5A880 !important;
             background-color: rgba(197, 168, 128, 0.05) !important;
         }
+
+        /* Carousel Editing Elements */
+        .v-carousel-edit-bar {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+            background: rgba(28, 28, 28, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid rgba(197, 168, 128, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .v-carousel-btn-label {
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: 'Inter', sans-serif;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            margin: 0;
+        }
+        .v-carousel-btn-label:hover {
+            color: #C5A880;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .v-slide-delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 100;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        .v-slide-delete-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
     `;
     document.head.appendChild(styles);
 
@@ -1115,8 +1184,14 @@ function initVisualEditor() {
         // Select all text-containing elements
         const editables = root.querySelectorAll('h1, h2, h3, h4, p, span, li, button, option, label');
         editables.forEach(el => {
-            // Exclude drag drop zone elements, sample thumbnails, and navigation elements
-            if (el.closest('.drag-drop-zone') || el.closest('.sample-images-container') || el.classList.contains('carousel-nav-btn')) return;
+            // Exclude drag drop zone elements, sample thumbnails, navigation, and visual editor UI elements
+            if (
+                el.closest('.drag-drop-zone') || 
+                el.closest('.sample-images-container') || 
+                el.classList.contains('carousel-nav-btn') ||
+                el.closest('.v-carousel-edit-bar') ||
+                el.classList.contains('v-slide-delete-btn')
+            ) return;
             
             // Check if el has direct text content
             if (el.children.length === 0 || Array.from(el.childNodes).some(node => node.nodeType === Node.TEXT_NODE && node.nodeValue.trim() !== '')) {
@@ -1124,39 +1199,174 @@ function initVisualEditor() {
                 el.classList.add('v-editable-active');
             }
         });
+
+        // Initialize Carousel Editing Controls
+        const wrappers = root.querySelectorAll('.gallery-img-wrapper');
+        wrappers.forEach(wrapper => {
+            // 1. Add Edit Bar
+            const editBar = document.createElement('div');
+            editBar.className = 'v-carousel-edit-bar';
+            editBar.innerHTML = `
+                <label class="v-carousel-btn-label">
+                    ➕ Añadir Foto
+                    <input type="file" accept="image/*" class="v-carousel-file-input" style="display:none;">
+                </label>
+            `;
+            wrapper.appendChild(editBar);
+
+            // File Upload Listener
+            const fileInput = editBar.querySelector('.v-carousel-file-input');
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const base64Data = evt.target.result;
+                    
+                    // Show upload status
+                    const btnLabel = editBar.querySelector('.v-carousel-btn-label');
+                    const originalText = btnLabel.innerHTML;
+                    btnLabel.innerHTML = '🔄 Subiendo...';
+
+                    fetch('/api/upload-image', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            filename: file.name,
+                            fileData: base64Data
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        btnLabel.innerHTML = originalText;
+                        if (data.success) {
+                            const carousel = wrapper.querySelector('.gallery-carousel');
+                            
+                            // Deactivate existing slides
+                            carousel.querySelectorAll('.carousel-slide').forEach(s => s.classList.remove('active'));
+
+                            // Create new slide
+                            const newSlide = document.createElement('div');
+                            newSlide.className = 'carousel-slide active';
+                            newSlide.style.backgroundImage = `url('${data.filePath}')`;
+                            
+                            // Add Delete Button
+                            const delBtn = createDeleteBtn();
+                            newSlide.appendChild(delBtn);
+
+                            carousel.appendChild(newSlide);
+                            alert('¡Foto subida y añadida al carrusel con éxito!');
+                        } else {
+                            alert('Error al subir imagen: ' + data.message);
+                        }
+                    })
+                    .catch(err => {
+                        btnLabel.innerHTML = originalText;
+                        console.error(err);
+                        alert('Error al conectar con el servidor para subir la imagen. Por favor, asegúrate de correr el servidor local ("node server.js").');
+                    });
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 2. Add Delete Buttons to existing slides
+            function createDeleteBtn() {
+                const delBtn = document.createElement('button');
+                delBtn.className = 'v-slide-delete-btn';
+                delBtn.innerHTML = '🗑️';
+                delBtn.title = 'Eliminar esta foto';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (confirm('¿Estás seguro de que quieres eliminar esta foto de la galería?')) {
+                        const slide = delBtn.parentElement;
+                        const carousel = slide.parentElement;
+                        const wasActive = slide.classList.contains('active');
+                        
+                        slide.remove();
+                        
+                        // If active, make the first remaining slide active
+                        if (wasActive) {
+                            const remaining = carousel.querySelectorAll('.carousel-slide');
+                            if (remaining.length > 0) {
+                                remaining[0].classList.add('active');
+                            }
+                        }
+                    }
+                });
+                return delBtn;
+            }
+
+            wrapper.querySelectorAll('.carousel-slide').forEach(slide => {
+                const delBtn = createDeleteBtn();
+                slide.appendChild(delBtn);
+            });
+        });
     }
 
     // Save Action
     document.getElementById('btn-editor-save').addEventListener('click', () => {
-        // Temporarily remove edit outlines before saving
-        const editables = document.querySelectorAll('.v-editable-active');
-        editables.forEach(el => {
+        // Show saving state on the button
+        const saveBtn = document.getElementById('btn-editor-save');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = '💾 Guardando...';
+        saveBtn.disabled = true;
+
+        // Clone DOM to construct clean HTML payload
+        const rootClone = root.cloneNode(true);
+
+        // Strip Visual Editor Elements
+        rootClone.querySelectorAll('.v-carousel-edit-bar').forEach(el => el.remove());
+        rootClone.querySelectorAll('.v-slide-delete-btn').forEach(el => el.remove());
+        rootClone.querySelectorAll('[contenteditable]').forEach(el => {
             el.removeAttribute('contenteditable');
+        });
+        rootClone.querySelectorAll('.v-editable-active').forEach(el => {
             el.classList.remove('v-editable-active');
         });
 
-        // Get updated HTML of root
-        const root = document.getElementById('editable-content-root');
-        const customHtml = root.innerHTML;
+        const customHtml = rootClone.innerHTML;
 
-        // Restore outlines
-        editables.forEach(el => {
-            el.contentEditable = "true";
-            el.classList.add('v-editable-active');
-        });
+        // Try POSTing to local server
+        fetch('/api/save-content', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ html: customHtml })
+        })
+        .then(res => res.json())
+        .then(data => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+            
+            if (data.success) {
+                // Clear localStorage cache on successful disk save to keep disk as source of truth
+                localStorage.removeItem('voreal_site_content_html');
+                alert('🎉 ¡Cambios guardados de forma permanente en index.html!\nSincronizando con GitHub en segundo plano para actualizar la web de Vercel...');
+            } else {
+                // Backup save locally
+                localStorage.setItem('voreal_site_content_html', customHtml);
+                alert('⚠️ Guardado localmente en el navegador. El servidor reportó un problema: ' + data.message);
+            }
+        })
+        .catch(err => {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+            console.warn('Saving to local server failed, falling back to localStorage.', err);
 
-        try {
+            // Backup save locally
             localStorage.setItem('voreal_site_content_html', customHtml);
-            alert('🎉 ¡Cambios guardados con éxito en este navegador! El sitio cargará esta versión modificada a partir de ahora.');
-        } catch(e) {
-            console.error(e);
-            alert('Error al guardar cambios: ' + e.message);
-        }
+            alert('💾 Cambios guardados localmente en tu navegador.\n\n(Nota: Si quieres que los cambios se guarden directamente en el archivo index.html físico y se suban a GitHub, recuerda ejecutar el servidor local con "node server.js").');
+        });
     });
 
     // Cancel Action
     document.getElementById('btn-editor-cancel').addEventListener('click', () => {
-        if (confirm('¿Salir del editor? Los cambios no guardados se perderán.')) {
+        if (confirm('¿Salir del editor? Los cambios no guardados en disco o localmente se perderán.')) {
             window.location.href = window.location.pathname; // Reload without query params
         }
     });
@@ -1179,13 +1389,15 @@ function initVisualEditor() {
             clonePreviewFrame.classList.remove('hidden');
         }
 
-        // Remove contenteditable and helper classes
+        // Remove contenteditable, helpers, and edit interfaces
         docClone.querySelectorAll('[contenteditable]').forEach(el => {
             el.removeAttribute('contenteditable');
         });
         docClone.querySelectorAll('.v-editable-active').forEach(el => {
             el.classList.remove('v-editable-active');
         });
+        docClone.querySelectorAll('.v-carousel-edit-bar').forEach(el => el.remove());
+        docClone.querySelectorAll('.v-slide-delete-btn').forEach(el => el.remove());
 
         // Remove active class from sizes (default chico active)
         docClone.querySelectorAll('.size-card').forEach(card => {
@@ -1219,6 +1431,6 @@ function initVisualEditor() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
         
-        alert('📥 Se ha descargado tu archivo "index.html" actualizado con los nuevos textos. Reemplaza el archivo original en tu proyecto y súbelo a GitHub para actualizarlo de forma permanente en la web.');
+        alert('📥 Se ha descargado tu archivo "index.html" actualizado con los nuevos textos y carruseles. Reemplaza el archivo original en tu proyecto y súbelo a GitHub para actualizarlo de forma permanente en la web.');
     });
 }

@@ -1,0 +1,19 @@
+{
+  "name": "voreal-cuadros",
+  "version": "1.0.0",
+  "description": "Tienda interactiva premium de Voreal Cuadros con CRM integrado y editor visual de contenidos.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "voreal",
+    "cuadros",
+    "visualizer",
+    "crm"
+  ],
+  "author": "Voreal Development Team",
+  "license": "ISC",
+  "dependencies": {}
+}
