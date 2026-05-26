@@ -461,20 +461,58 @@ a {
     letter-spacing: 0.3px;
 }
 
-/* Rotated (Landscape) frame sizes */
+/* Rotated (Landscape) frame sizes — swap width/height */
 .virtual-frame.size-chico.rotated {
-    width: 144px;   /* 30 units */
-    height: 120px;  /* 25 units — swapped */
+    width: 144px;   /* 30 cm units */
+    height: 120px;  /* 25 cm units — swapped */
 }
 
 .virtual-frame.size-clasico.rotated {
-    width: 240px;   /* 50 units */
-    height: 144px;  /* 30 units — swapped */
+    width: 240px;   /* 50 cm units */
+    height: 144px;  /* 30 cm units — swapped */
 }
 
 .virtual-frame.size-grande.rotated {
-    width: 288px;   /* 60 units */
-    height: 240px;  /* 50 units — swapped */
+    width: 288px;   /* 60 cm units */
+    height: 240px;  /* 50 cm units — swapped */
+}
+
+/* Rotated frame-content: sized at portrait proportions, rotated 90°
+   so the photo visually turns and fills the landscape frame perfectly */
+.virtual-frame.size-chico.rotated .frame-content {
+    /* portrait dims: 120×144 */
+    width: 120px;
+    height: 144px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -60px;
+    margin-top: -72px;
+    transform: rotate(90deg);
+}
+
+.virtual-frame.size-clasico.rotated .frame-content {
+    /* portrait dims: 144×240 */
+    width: 144px;
+    height: 240px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -72px;
+    margin-top: -120px;
+    transform: rotate(90deg);
+}
+
+.virtual-frame.size-grande.rotated .frame-content {
+    /* portrait dims: 240×288 */
+    width: 240px;
+    height: 288px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -120px;
+    margin-top: -144px;
+    transform: rotate(90deg);
 }
 
 /* Legacy: preview-panel still used by JS refs */
@@ -510,21 +548,22 @@ a {
 /* 3D Frame Styling */
 .virtual-frame {
     background-color: #eaeaea;
-    background-image: repeating-linear-gradient(45deg, #eaeaea, #eaeaea 10px, #f5f5f5 10px, #f5f5f5 20px); /* canvas texture fallback */
+    background-image: repeating-linear-gradient(45deg, #eaeaea, #eaeaea 10px, #f5f5f5 10px, #f5f5f5 20px);
     box-shadow: 
         1px 1px 0 #2c2c2c, 
         2px 2px 0 #2c2c2c, 
         3px 3px 0 #202020, 
         4px 4px 0 #151515, 
-        var(--shadow-frame); /* Native 3D extrusion via cascaded shadows, avoids Safari/mobile skew gaps */
+        var(--shadow-frame);
     position: relative;
     border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    transition: all 0.45s cubic-bezier(0.19, 1, 0.22, 1);
     transform: perspective(800px) rotateX(2deg) rotateY(-4deg);
     border: none;
+    overflow: hidden; /* needed so rotated content doesn't spill out */
 }
 
 .frame-content {
