@@ -119,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCartFromStorage();
     initEventListeners();
     updateUI();
+    initGalleryCarousels();
 });
 
 // 4. Event Listeners Setup
@@ -739,4 +740,51 @@ function loadCartFromStorage() {
     } catch(e) {
         console.error("No se pudo leer el carrito de localstorage", e);
     }
+}
+
+// 12. Gallery Carousels logic
+function initGalleryCarousels() {
+    const items = document.querySelectorAll('.gallery-item');
+    items.forEach(item => {
+        const carousel = item.querySelector('.gallery-carousel');
+        if (!carousel) return;
+
+        const slides = carousel.querySelectorAll('.carousel-slide');
+        const prevBtn = item.querySelector('.prev-btn');
+        const nextBtn = item.querySelector('.next-btn');
+        if (!slides.length || !prevBtn || !nextBtn) return;
+
+        let index = 0;
+
+        function showSlide(newIndex) {
+            slides[index].classList.remove('active');
+            index = (newIndex + slides.length) % slides.length;
+            slides[index].classList.add('active');
+        }
+
+        prevBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showSlide(index - 1);
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showSlide(index + 1);
+        });
+        
+        // Auto play every 5 seconds
+        let interval = setInterval(() => {
+            showSlide(index + 1);
+        }, 4000 + Math.random() * 2000); // offset intervals to look natural
+        
+        // Pause auto play on hover
+        item.addEventListener('mouseenter', () => clearInterval(interval));
+        item.addEventListener('mouseleave', () => {
+            interval = setInterval(() => {
+                showSlide(index + 1);
+            }, 5000);
+        });
+    });
 }

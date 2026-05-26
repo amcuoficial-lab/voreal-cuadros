@@ -45,6 +45,11 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            display: none; /* Oculto por defecto hasta validar contraseña */
+        }
+
+        .container.authorized {
+            display: block;
         }
 
         /* Header Styling */
@@ -153,6 +158,8 @@
         }
 
         .metric-card.m-sales::before { background-color: var(--accent-gold); }
+        .metric-card.m-expenses::before { background-color: #e74c3c; }
+        .metric-card.m-profit::before { background-color: #2ecc71; }
         .metric-card.m-pending::before { background-color: var(--color-pendiente); }
         .metric-card.m-prod::before { background-color: var(--color-produccion); }
         .metric-card.m-done::before { background-color: var(--color-completado); }
@@ -617,9 +624,177 @@
         .btn-download-img:hover {
             background-color: var(--accent-gold);
         }
+
+        /* Login Overlay Styling */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 20, 24, 0.96);
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .login-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .login-box {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(197, 168, 128, 0.25);
+            border-radius: 16px;
+            padding: 40px 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            animation: loginZoomIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes loginZoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .login-logo {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .login-box h2 {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .login-box p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .login-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .login-form-group label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-form-group input {
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            outline: none;
+            background-color: var(--bg-crm);
+            transition: all 0.3s ease;
+        }
+
+        .login-form-group input:focus {
+            border-color: var(--accent-gold);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(197, 168, 128, 0.15);
+        }
+
+        .login-error {
+            background-color: rgba(235, 94, 85, 0.1);
+            color: #d9383a;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(235, 94, 85, 0.2);
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .btn-login-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            background-color: var(--text-main);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login-submit:hover {
+            background-color: var(--accent-gold);
+            box-shadow: 0 8px 20px rgba(197, 168, 128, 0.2);
+        }
     </style>
 </head>
 <body>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="login-overlay">
+        <div class="login-box">
+            <div class="login-logo">
+                <svg width="60" height="60" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="47" stroke="#c5a880" stroke-width="1.5"/>
+                    <rect x="33" y="25" width="34" height="34" stroke="#c5a880" stroke-width="1"/>
+                    <path d="M41 33 L50 51" stroke="#c5a880" stroke-width="4.5" stroke-linecap="round"/>
+                    <path d="M50 51 L59 33" stroke="#DCA2A7" stroke-width="4.5" stroke-linecap="round"/>
+                    <text x="50" y="70" font-family="'Cormorant Garamond', serif" font-weight="700" font-size="12" fill="#c5a880" text-anchor="middle" letter-spacing="1.5">VOREAL</text>
+                </svg>
+            </div>
+            <h2>Acceso CRM Voreal</h2>
+            <p>Ingresa las credenciales de administración para continuar.</p>
+            <form id="login-form">
+                <div class="login-form-group">
+                    <label for="login-username">Usuario</label>
+                    <input type="text" id="login-username" required placeholder="Ej: Voreal">
+                </div>
+                <div class="login-form-group">
+                    <label for="login-password">Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <div class="login-error hidden" id="login-error">
+                    ❌ Usuario o contraseña incorrectos
+                </div>
+                <button type="submit" class="btn-login-submit">Ingresar</button>
+            </form>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header>
@@ -635,6 +810,9 @@
                     </svg>
                     Ver Tienda
                 </a>
+                <button class="btn btn-gold" id="btn-import" style="background-color: var(--accent-blue); color: white;">
+                    📥 Importar de WhatsApp
+                </button>
                 <button class="btn btn-gold" id="btn-seed">
                     Cargar Demos
                 </button>
@@ -646,6 +824,14 @@
             <div class="metric-card m-sales">
                 <span class="metric-title">Ventas Totales</span>
                 <span class="metric-value" id="val-sales">$0</span>
+            </div>
+            <div class="metric-card m-expenses">
+                <span class="metric-title">Gastos Totales</span>
+                <span class="metric-value" id="val-expenses">$0</span>
+            </div>
+            <div class="metric-card m-profit">
+                <span class="metric-title">Ganancia Neta</span>
+                <span class="metric-value" id="val-profit">$0</span>
             </div>
             <div class="metric-card m-pending">
                 <span class="metric-title">Nuevos Pedidos</span>
@@ -741,6 +927,20 @@
                         <a href="#" download="voreal-cuadro.jpg" class="btn-download-img" id="modal-btn-download">Descargar Imagen</a>
                     </div>
                 </div>
+            </div>
+        </div>
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="import-modal">
+        <div class="modal-box" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Importar Pedido de WhatsApp</h2>
+                <button class="modal-close" id="import-modal-close">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <p style="font-size: 13px; color: var(--text-muted);">Copia el mensaje de pedido que recibiste en WhatsApp y pégalo aquí abajo para registrarlo en el sistema automáticamente:</p>
+                <textarea id="import-textarea" placeholder="Pega el mensaje de WhatsApp completo aquí..." rows="10"
+                          style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-family: monospace; font-size: 12px; outline: none; resize: vertical;"></textarea>
+                <button class="btn btn-gold btn-block" id="btn-do-import">Importar al CRM</button>
             </div>
         </div>
     </div>
@@ -841,10 +1041,56 @@
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadOrders();
-            initListeners();
-            updateDashboard();
+            checkAuthentication();
         });
+
+        function checkAuthentication() {
+            const loggedIn = sessionStorage.getItem('voreal_admin_logged_in');
+            const overlay = document.getElementById('login-overlay');
+            const container = document.querySelector('.container');
+            
+            if (loggedIn === 'true') {
+                overlay.classList.add('hidden');
+                container.classList.add('authorized');
+                loadOrders();
+                initListeners();
+                updateDashboard();
+            } else {
+                overlay.classList.remove('hidden');
+                container.classList.remove('authorized');
+                initLoginListener();
+            }
+        }
+
+        function initLoginListener() {
+            const form = document.getElementById('login-form');
+            const userIn = document.getElementById('login-username');
+            const passIn = document.getElementById('login-password');
+            const errBox = document.getElementById('login-error');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = userIn.value.trim();
+                const password = passIn.value;
+
+                if (username === 'Voreal' && password === 'rosana123') {
+                    errBox.classList.add('hidden');
+                    sessionStorage.setItem('voreal_admin_logged_in', 'true');
+                    document.getElementById('login-overlay').classList.add('hidden');
+                    document.querySelector('.container').classList.add('authorized');
+                    
+                    loadOrders();
+                    initListeners();
+                    updateDashboard();
+                } else {
+                    errBox.classList.remove('hidden');
+                    // Reset CSS animation to shake again on multiple errors
+                    errBox.style.animation = 'none';
+                    errBox.offsetHeight; /* trigger reflow */
+                    errBox.style.animation = ''; 
+                }
+            });
+        }
 
         function loadOrders() {
             try {
@@ -871,6 +1117,8 @@
         }
 
         function initListeners() {
+            initImportListener();
+
             // Seed Button
             document.getElementById('btn-seed').addEventListener('click', () => {
                 if (confirm('¿Cargar órdenes demo en el panel? Se añadirán a las existentes.')) {
@@ -911,6 +1159,7 @@
 
         function calculateMetrics() {
             let totalSales = 0;
+            let totalExpenses = 0;
             let pendingCount = 0;
             let productionCount = 0;
             let completedCount = 0;
@@ -924,9 +1173,17 @@
                 } else if (order.status === 'En Producción') {
                     productionCount++;
                 }
+
+                if (order.cost) {
+                    totalExpenses += order.cost;
+                }
             });
 
+            const netProfit = totalSales - totalExpenses;
+
             document.getElementById('val-sales').textContent = formatPrice(totalSales);
+            document.getElementById('val-expenses').textContent = formatPrice(totalExpenses);
+            document.getElementById('val-profit').textContent = formatPrice(netProfit);
             document.getElementById('val-pending').textContent = pendingCount;
             document.getElementById('val-production').textContent = productionCount;
             document.getElementById('val-completed').textContent = completedCount;
@@ -980,7 +1237,17 @@
                     </td>
                     <td>
                         <span class="total-price">${formatPrice(order.finalTotal)}</span>
-                        ${order.promoApplied ? '<div style="font-size:9px;color:var(--accent-gold-dark);font-weight:600;">Promo Aplicada</div>' : ''}
+                        ${order.promoApplied ? '<div style="font-size:9px;color:var(--accent-gold-dark);font-weight:600;margin-bottom:6px;">Promo Aplicada</div>' : ''}
+                        <div style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                            <label style="font-size:10px; color:var(--text-muted); font-weight:600; text-transform:uppercase;">Costo:</label>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <span style="font-size:11px; color:var(--text-muted);">$</span>
+                                <input type="number" value="${order.cost || ''}" placeholder="0" 
+                                       style="width:70px; padding:2px 6px; font-size:12px; border:1px solid var(--border-color); border-radius:4px; outline:none;"
+                                       onchange="updateOrderCost('${order.id}', this.value)">
+                            </div>
+                            ${order.cost ? `<div style="font-size:11px; color:#2ecc71; font-weight:600; margin-top:2px;">Ganancia: ${formatPrice(order.finalTotal - order.cost)}</div>` : ''}
+                        </div>
                     </td>
                     <td>
                         <div class="status-wrapper">
@@ -1013,6 +1280,15 @@
         }
 
         // Action Handlers
+        window.updateOrderCost = function(orderId, newCost) {
+            const order = state.orders.find(o => o.id === orderId);
+            if (order) {
+                order.cost = newCost ? parseFloat(newCost) : 0;
+                saveOrdersToStorage();
+                updateDashboard();
+            }
+        };
+
         window.changeOrderStatus = function(orderId, newStatus) {
             const order = state.orders.find(o => o.id === orderId);
             if (order) {
@@ -1172,6 +1448,201 @@
             }
             
             return cleaned;
+        }
+
+        // WhatsApp Order Import Logic
+        function initImportListener() {
+            const btnImport = document.getElementById('btn-import');
+            const importModal = document.getElementById('import-modal');
+            const importClose = document.getElementById('import-modal-close');
+            const btnDoImport = document.getElementById('btn-do-import');
+            const textIn = document.getElementById('import-textarea');
+
+            if (btnImport) {
+                btnImport.addEventListener('click', () => {
+                    textIn.value = '';
+                    importModal.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (importClose) {
+                importClose.addEventListener('click', () => {
+                    importModal.classList.remove('open');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            if (importModal) {
+                importModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'import-modal') {
+                        importModal.classList.remove('open');
+                        document.body.style.overflow = '';
+                    }
+                });
+            }
+
+            if (btnDoImport) {
+                btnDoImport.addEventListener('click', () => {
+                    const text = textIn.value.trim();
+                    if (!text) {
+                        alert('Por favor, pega el mensaje de WhatsApp.');
+                        return;
+                    }
+
+                    try {
+                        const parsed = parseWhatsAppMessage(text);
+                        if (!parsed) {
+                            alert('No se pudo reconocer el formato del mensaje de WhatsApp. Asegúrate de copiar el mensaje completo de la orden.');
+                            return;
+                        }
+
+                        // Check if order already exists
+                        const exists = state.orders.some(o => o.id === parsed.id);
+                        if (exists) {
+                            if (!confirm(`La orden ${parsed.id} ya existe en el CRM. ¿Quieres sobreescribirla?`)) {
+                                return;
+                            }
+                            state.orders = state.orders.filter(o => o.id !== parsed.id);
+                        }
+
+                        state.orders.unshift(parsed);
+                        saveOrdersToStorage();
+                        updateDashboard();
+                        
+                        importModal.classList.remove('open');
+                        document.body.style.overflow = '';
+                        alert(`¡Orden ${parsed.id} importada con éxito!`);
+                    } catch(err) {
+                        console.error(err);
+                        alert('Error al procesar el mensaje de WhatsApp: ' + err.message);
+                    }
+                });
+            }
+        }
+
+        function parseWhatsAppMessage(text) {
+            // Find order ID
+            const idMatch = text.match(/Orden:\s*\*?(VR-\d+)\*?/i);
+            if (!idMatch) return null;
+            const orderId = idMatch[1];
+
+            // Client info parsing
+            const nameMatch = text.match(/Nombre:\*?\s*(.+)/i);
+            const name = nameMatch ? nameMatch[1].trim() : 'Cliente sin nombre';
+
+            const phoneMatch = text.match(/WhatsApp:\*?\s*(.+)/i);
+            const phone = phoneMatch ? phoneMatch[1].trim() : '';
+
+            const deliveryMatch = text.match(/Entrega:\*?\s*(.+)/i);
+            const deliveryRaw = deliveryMatch ? deliveryMatch[1].trim() : '';
+            const delivery = (deliveryRaw.toLowerCase().includes('envío') || deliveryRaw.toLowerCase().includes('envio')) ? 'envio' : 'retiro';
+
+            const addressMatch = text.match(/Dirección:\*?\s*(.+)/i);
+            const address = addressMatch ? addressMatch[1].trim() : '';
+
+            // Notes parsing
+            const notesMatch = text.match(/Notas adicionales:\*?\s*(.+)/i);
+            const notes = notesMatch ? notesMatch[1].trim() : '';
+
+            // Total price parsing
+            const totalMatch = text.match(/TOTAL A ABONAR:\*?\s*\*?\$?\s*([\d.]+)/i);
+            let finalTotal = 0;
+            if (totalMatch) {
+                // Remove dots (Argentina price format like 25.000)
+                finalTotal = parseFloat(totalMatch[1].replace(/\./g, ''));
+            }
+
+            // Items parsing
+            const items = [];
+            // Match each block starting with "📦 Cuadro" or "📦 Item"
+            const itemBlocks = text.split(/📦\s*Cuadro\s*\d+:/i);
+            if (itemBlocks.length > 1) {
+                for (let i = 1; i < itemBlocks.length; i++) {
+                    const block = itemBlocks[i];
+                    
+                    const formatMatch = block.match(/Formato:\s*(.+)/i);
+                    const sizeName = formatMatch ? formatMatch[1].trim() : 'Formato Desconocido';
+                    
+                    const qtyMatch = block.match(/Cantidad:\s*(\d+)/i);
+                    const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                    
+                    const photoMatch = block.match(/Foto:\s*(.+)/i);
+                    const imageName = photoMatch ? photoMatch[1].trim() : 'Imagen';
+
+                    // Map size name to size code for thumbnails mock
+                    let sizeCode = 'chico';
+                    if (sizeName.toLowerCase().includes('clásico') || sizeName.toLowerCase().includes('clasico')) sizeCode = 'clasico';
+                    if (sizeName.toLowerCase().includes('grande')) sizeCode = 'grande';
+                    if (sizeName.toLowerCase().includes('tríptico') || sizeName.toLowerCase().includes('triptico')) sizeCode = 'triptico';
+
+                    // Mock source image
+                    let imageSrc = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600';
+                    if (sizeCode === 'chico') imageSrc = 'assets/25x30/chico-1.jpeg';
+                    if (sizeCode === 'clasico') imageSrc = 'assets/30x50/clasico-1.jpeg';
+                    if (sizeCode === 'grande') imageSrc = 'assets/50x60/grande-1.jpeg';
+                    if (sizeCode === 'triptico') imageSrc = 'assets/triptico/triptico-1.jpeg';
+
+                    items.push({
+                        size: sizeCode,
+                        sizeName: sizeName,
+                        quantity: quantity,
+                        unitPrice: sizeCode === 'chico' ? 10000 : (sizeCode === 'clasico' ? 15000 : (sizeCode === 'grande' ? 25000 : 35000)),
+                        imageName: imageName,
+                        imageSrc: imageSrc
+                    });
+                }
+            } else {
+                // Single item parser fallback if split fails
+                const formatMatch = text.match(/Formato:\s*(.+)/i);
+                if (formatMatch) {
+                    const sizeName = formatMatch[1].trim();
+                    const qtyMatch = text.match(/Cantidad:\s*(\d+)/i);
+                    const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+                    const photoMatch = text.match(/Foto:\s*(.+)/i);
+                    const imageName = photoMatch ? photoMatch[1].trim() : 'Imagen';
+
+                    let sizeCode = 'chico';
+                    if (sizeName.toLowerCase().includes('clásico') || sizeName.toLowerCase().includes('clasico')) sizeCode = 'clasico';
+                    if (sizeName.toLowerCase().includes('grande')) sizeCode = 'grande';
+                    if (sizeName.toLowerCase().includes('tríptico') || sizeName.toLowerCase().includes('triptico')) sizeCode = 'triptico';
+
+                    let imageSrc = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600';
+                    if (sizeCode === 'chico') imageSrc = 'assets/25x30/chico-1.jpeg';
+                    if (sizeCode === 'clasico') imageSrc = 'assets/30x50/clasico-1.jpeg';
+                    if (sizeCode === 'grande') imageSrc = 'assets/50x60/grande-1.jpeg';
+                    if (sizeCode === 'triptico') imageSrc = 'assets/triptico/triptico-1.jpeg';
+
+                    items.push({
+                        size: sizeCode,
+                        sizeName: sizeName,
+                        quantity: quantity,
+                        unitPrice: sizeCode === 'chico' ? 10000 : (sizeCode === 'clasico' ? 15000 : (sizeCode === 'grande' ? 25000 : 35000)),
+                        imageName: imageName,
+                        imageSrc: imageSrc
+                    });
+                }
+            }
+
+            const orderDate = new Date().toLocaleDateString('es-AR') + ' ' + new Date().toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit'});
+
+            return {
+                id: orderId,
+                client: {
+                    name,
+                    phone,
+                    delivery,
+                    address,
+                    notes
+                },
+                items,
+                originalTotal: finalTotal,
+                finalTotal: finalTotal,
+                promoApplied: text.toLowerCase().includes('promoción aplicada'),
+                date: orderDate,
+                status: 'Pendiente',
+                cost: 0
+            };
         }
     </script>
 </body>
