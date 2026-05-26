@@ -71,6 +71,7 @@ const elements = {
     placeholderText: document.getElementById('placeholder-text'),
     scaleText: document.getElementById('scale-text'),
     triptychNotice: document.getElementById('triptych-notice'),
+    triptychPreviewInfo: document.getElementById('triptych-preview-info'),
     
     // Controls Elements
     imageUpload: document.getElementById('image-upload'),
@@ -354,10 +355,8 @@ function updateCustomizerDimensions() {
     
     if (size.startsWith('triptico_')) {
         elements.previewFrame.classList.add('hidden');
-        elements.previewTriptych.classList.remove('hidden');
-        
-        // Apply the correct size class for the triptych container
-        elements.previewTriptych.className = 'triptych-frame-container ' + size;
+        elements.previewTriptych.classList.add('hidden'); // Ocultado para que no se muestren los paneles vacíos
+        if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.remove('hidden'); // Mostrar aviso de WS
         
         let label = '3 paneles';
         if (size === 'triptico_chico') label = '3 paneles (3x 25x30 cm)';
@@ -371,6 +370,7 @@ function updateCustomizerDimensions() {
         if (elements.whatsappDirectBtn) elements.whatsappDirectBtn.classList.remove('hidden');
     } else {
         elements.previewTriptych.classList.add('hidden');
+        if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.add('hidden');
         elements.previewFrame.classList.remove('hidden');
         elements.previewFrame.classList.add(`size-${size}`);
         if (elements.triptychNotice) elements.triptychNotice.classList.add('hidden');
