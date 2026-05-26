@@ -32,13 +32,7 @@ const PRICING = {
         promoPrice: 40000,
         promoText: '2x $40.000'
     },
-    triptico_chico: {
-        name: 'TRÍPTICO CHICO (3x 25x30 cm)',
-        unitPrice: 25000,
-        promoQty: 2,
-        promoPrice: 45000,
-        promoText: '2x $45.000'
-    },
+
     triptico_clasico: {
         name: 'TRÍPTICO CLÁSICO (3x 30x50 cm - total 1x50 cm)',
         unitPrice: 35000,
@@ -360,7 +354,7 @@ function updateCustomizerDimensions() {
         if (elements.triptychPreviewInfo) elements.triptychPreviewInfo.classList.remove('hidden'); // Mostrar aviso de WS
         
         let label = '3 paneles';
-        if (size === 'triptico_chico') label = '3 paneles (3x 25x30 cm)';
+
         if (size === 'triptico_clasico') label = '3 paneles (3x 30x50 cm - total 1x50 cm)';
         if (size === 'triptico_grande') label = '3 paneles (3x 50x60 cm)';
         elements.scaleText.textContent = label;
